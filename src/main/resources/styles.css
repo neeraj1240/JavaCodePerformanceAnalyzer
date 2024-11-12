@@ -1,0 +1,288 @@
+/* styles.css */
+
+/* General Styles */
+.root {
+    -fx-font-family: "Segoe UI", Helvetica, Arial, sans-serif;
+    -fx-font-size: 14px;
+    -fx-background-color: #1e1e1e;
+    -fx-text-fill: #f0f0f0;
+}
+
+.result-box .time-unit-label,
+.result-box .memory-unit-label {
+    -fx-text-fill: #ffffff !important; /* Ensure the color is applied */
+}
+
+.title-label {
+    -fx-font-size: 18px;
+    -fx-font-weight: bold;
+    -fx-text-fill: #79d0ff;
+}
+
+.user-manual-button {
+    -fx-background-color: #4CAF50;
+    -fx-text-fill: white;
+    -fx-font-size: 14px;
+    -fx-padding: 8 15;
+    -fx-cursor: hand;
+}
+
+.manual-section {
+    -fx-background-color: #2b2b2b;
+    -fx-border-color: #3c3c3c;
+    -fx-border-width: 1;
+    -fx-padding: 15;
+    -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.6), 5, 0, 0, 0);
+}
+
+.manual-section-title {
+    -fx-font-size: 16px;
+    -fx-font-weight: bold;
+    -fx-text-fill: #4CAF50;
+}
+
+.manual-section-content {
+    -fx-text-fill: #f0f0f0;
+    -fx-wrap-text: true;
+}
+
+.manual-section:hover {
+    -fx-background-color: #3a3a3a; /* Darker shade on hover */
+    -fx-border-color: #5c5c5c; /* Change border color on hover */
+    -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.8), 8, 0, 0, 2); /* Stronger shadow */
+    -fx-scale-x: 1.03; /* Slight zoom effect */
+    -fx-scale-y: 1.03; /* Slight zoom effect */
+}
+
+.notes-area {
+    -fx-background-color: #ffffff;  /* White background */
+    -fx-text-fill: #000000;        /* Black text */
+    -fx-font-family: "Segoe UI";
+    -fx-font-size: 14px;
+    -fx-padding: 10px;
+}
+
+.code-area {
+    -fx-font-family: 'Courier New';
+    -fx-font-size: 14px;
+    -fx-background-color: #ffffff;  /* White background */
+    -fx-text-fill: #000000;        /* Black text */
+    -fx-border-color: #3c3c3c;
+    -fx-border-width: 1px;
+    -fx-padding: 10px;
+}
+
+.section-title {
+    -fx-font-size: 18px;
+    -fx-font-weight: bold;
+    -fx-text-fill: #4CAF50;
+    -fx-padding: 10 0 5 0;  /* Add some padding */
+}
+
+.guide-content {
+    -fx-background-color: #2b2b2b;
+    -fx-spacing: 20;
+}
+
+.guide-title {
+    -fx-font-size: 24px;
+    -fx-font-weight: bold;
+    -fx-text-fill: #4CAF50;
+}
+
+
+.info-area {
+    -fx-background-color: #ffffff;
+    -fx-text-fill: #000000;
+    -fx-font-family: "Segoe UI";
+    -fx-font-size: 14px;
+    -fx-padding: 10px;
+    -fx-border-color: #3c3c3c;
+    -fx-border-width: 1px;
+}
+
+.info-area .content {
+    -fx-background-color: #ffffff;
+}
+
+.info-area:focused {
+    -fx-background-color: #ffffff;
+}
+
+
+
+.manual-section {
+    -fx-background-color: #2b2b2b;
+    -fx-border-color: #3c3c3c;
+    -fx-border-width: 1;
+    -fx-padding: 15;
+    -fx-spacing: 15;
+}
+
+.manual-section TextArea {
+    -fx-background-color: #2b2b2b;
+    -fx-text-fill: #a9b7c6;
+    -fx-font-family: "Courier New";
+    -fx-font-size: 12px;
+    -fx-border-color: #3c3c3c;
+}
+
+
+.main-layout {
+    -fx-padding: 20px;
+}
+
+.left-pane, .right-pane {
+    -fx-background-color: #2b2b2b;
+    -fx-border-color: #3c3c3c;
+    -fx-border-width: 1px;
+    -fx-border-radius: 8px; /* Rounded corners for a modern look */
+    -fx-padding: 20px;
+    -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.5), 10, 0.5, 0, 0); /* Add shadow for depth */
+}
+
+.code-input {
+    -fx-background-color: white;
+    -fx-text-fill: black;
+    -fx-border-color: #3c3c3c;
+    -fx-border-radius: 4px;
+    -fx-font-family: "Consolas", monospace;
+    -fx-font-size: 14px;
+}
+
+.result-area {
+    -fx-background-color: #3c3c3c;
+    -fx-border-color: #3c3c3c;
+    -fx-border-radius: 4px;
+    -fx-padding: 10px;
+}
+
+.result-box {
+    -fx-background-color: #424242;
+    -fx-border-color: #4e4e4e;
+    -fx-border-width: 1px;
+    -fx-border-radius: 4px;
+    -fx-padding: 10px;
+    -fx-text-fill: #f0f0f0;
+}
+
+.result-box .label {
+    -fx-text-fill: #b2ebf2;
+}
+
+.result-box .button {
+    -fx-text-fill: #f0f0f0;
+    -fx-font-family: "Segoe UI Semibold", sans-serif;
+    -fx-background-color: #3c3c3c;
+    -fx-padding: 6px 12px;
+    -fx-border-radius: 4px;
+}
+
+.result-box .button:hover {
+    -fx-background-color: #4e4e4e;
+}
+
+.analyze-button, .clear-button {
+    -fx-background-color: #0078d7;
+    -fx-text-fill: #f0f0f0;
+    -fx-font-weight: bold;
+    -fx-border-radius: 4px;
+    -fx-padding: 8px 16px;
+}
+
+.analyze-button:hover, .clear-button:hover {
+    -fx-background-color: #005a9e;
+}
+
+.analyze-button:pressed, .clear-button:pressed {
+    -fx-background-color: #004a85;
+}
+
+.analyzing-label {
+    -fx-font-size: 16px;
+    -fx-font-weight: bold;
+    -fx-text-fill: #0078d7;
+}
+
+.data-button {
+    -fx-background-color: #2196f3;
+    -fx-text-fill: white;
+    -fx-padding: 8px 16px;
+    -fx-cursor: hand;
+}
+
+.data-button:hover {
+    -fx-background-color: #1976d2;
+}
+
+.data-display {
+    -fx-background-color: #2b2b2b;
+}
+
+.data-area {
+    -fx-control-inner-background: #3c3c3c;
+    -fx-text-fill: #d0d0d0; /* Darker text color for better visibility */
+    -fx-font-family: 'Courier New';
+}
+
+.close-button {
+    -fx-background-color: #f44336;
+    -fx-text-fill: white;
+    -fx-padding: 8px 16px;
+    -fx-cursor: hand;
+}
+
+.close-button:hover {
+    -fx-background-color: #d32f2f;
+}
+
+/* Radio Button Styles */
+.radio-button {
+    -fx-background-color: #0078d7;
+    -fx-text-fill: #f0f0f0;
+    -fx-font-weight: bold;
+    -fx-border-radius: 4px;
+    -fx-padding: 8px 16px;
+}
+
+.radio-button:hover {
+    -fx-background-color: #005a9e;
+}
+
+.radio-button:pressed {
+    -fx-background-color: #004a85;
+}
+
+/* Manual Input Area */
+.manual-input-area {
+    -fx-background-color: #3c3c3c;
+    -fx-text-fill: black; /* Change text color to black for better visibility */
+    -fx-font-family: 'Courier New';
+}
+
+.user-manual-button {
+    -fx-background-color: #4CAF50;
+    -fx-text-fill: white;
+    -fx-font-size: 14px;
+    -fx-padding: 8 15;
+    -fx-cursor: hand;
+    -fx-background-radius: 5px;
+    -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.3), 5, 0, 0, 0);
+    -fx-transition: all 0.3s ease;
+}
+
+.user-manual-button:hover {
+    -fx-background-color: #45a049; /* Slightly darker green */
+    -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.5), 10, 0, 0, 0);
+    -fx-translate-y: -2px; /* Slight lift effect */
+    -fx-scale-x: 1.05;
+    -fx-scale-y: 1.05;
+}
+
+.user-manual-button:pressed {
+    -fx-background-color: #3d8b40; /* Even darker green */
+    -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.7), 5, 0, 0, 0);
+    -fx-translate-y: 0px;
+    -fx-scale-x: 1.0;
+    -fx-scale-y: 1.0;
+}
