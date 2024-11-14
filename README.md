@@ -1,6 +1,6 @@
-# Java Code Performance Analyzer
+# Java Code Performance Analyzer Tool
 
-A sophisticated desktop application that analyzes Java code performance metrics, including execution time, memory usage, and algorithmic complexity.
+A sophisticated desktop application that analyzes Java code performance metrics, including execution time, memory usage, and algorithmic complexity. Features automated test data generation with customizable input sizes up to 100,000 elements, eliminating the need for manual test data creation.
 
 ## Features
 
