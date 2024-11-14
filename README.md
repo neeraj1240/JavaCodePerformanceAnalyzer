@@ -36,7 +36,7 @@ Experience the Java Code Performance Analyzer Tool through these visual previews
 *Real-time performance metrics and graphs during code analysis*
 
 ### Memory Usage Visualization
-![Memory Usage Tracking](images/memoryusuagegraph.png)
+![Memory Usage Tracking](images/memoryusagegraph.png)
 *Detailed memory usage visualization with adjustable units*
 
 ### Execution Time Visualization
