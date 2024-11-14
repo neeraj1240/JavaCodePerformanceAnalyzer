@@ -32,7 +32,7 @@ Experience the Java Code Performance Analyzer Tool through these visual previews
 *The main application window showing code input panel and analysis options*
 
 ### Performance Analysis
-![Performance Analysis Dashboard](result.png)
+![Performance Analysis Dashboard](images/result.png)
 *Real-time performance metrics and graphs during code analysis*
 
 ### Memory Usage Visualization
