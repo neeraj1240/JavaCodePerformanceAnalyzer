@@ -23,6 +23,27 @@ A sophisticated desktop application that analyzes Java code performance metrics,
 - **Input/Output Data Visualization**
 - **User Manual Integration**
 
+
+## Snapshots
+Experience the Java Code Performance Analyzer Tool through these visual previews:
+
+### Main Interface
+![Main Application Interface](images/menu.png)
+*The main application window showing code input panel and analysis options*
+
+### Performance Analysis
+![Performance Analysis Dashboard](result.png)
+*Real-time performance metrics and graphs during code analysis*
+
+### Memory Usage Visualization
+![Memory Usage Tracking](images/memoryusuagegraph.png)
+*Detailed memory usage visualization with adjustable units*
+
+### Execution Time Visualization
+![Execution time Tracking](images/executiongraph.png)
+*Detailed memory usage visualization with adjustable units*
+
+
 ## Requirements
 
 - [Java Development Kit (JDK) 8 or higher](https://openjdk.org/projects/jdk/21/)
