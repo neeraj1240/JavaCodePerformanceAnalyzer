@@ -99,12 +99,6 @@ Contributions are welcome! Please feel free to submit a [Pull Request](https://d
 
 This project is licensed under the MIT License - see the [LICENSE](https://choosealicense.com/licenses/mit/) file for details.
 
-## Acknowledgments
-
-- [Java Development Team](https://www.oracle.com/java/technologies/javase-downloads.html)
-- [JavaFX Community](https://openjfx.io/)
-- All contributors and testers
-
 ## Support
 
 For support, please open an issue in the GitHub repository or contact the maintainers.
