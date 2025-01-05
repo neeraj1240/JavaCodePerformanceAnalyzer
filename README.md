@@ -133,12 +133,4 @@ For support, please open an issue in the GitHub repository or contact the mainta
 - Batch analysis capabilities
 
 ---
-**Note**: This project is continuously under development. Feedback and contributions are always welcome!
 
----
-
-
-### Tags
-#java #performance #coding #programming #developer #software #computerscience #algorithms #datastructures #optimization #javafx #desktop #application #analysis #benchmark #performance-testing #code-analysis #java-development #software-development #github #opensource #mit-license #javadevelopment #coding-tools #developer-tools #performance-optimization #algorithm-analysis #time-complexity #space-complexity #big-o-notation #memory-management #execution-time #visualization #metrics #programming-tools #code-quality #software-engineering #technical-analysis #performance-metrics #java-programming #java-tools #software-testing #code-testing #performance-monitoring #code-optimization #educational-tools #learning-resources #code-efficiency #algorithmic-complexity #memory-profiling #execution-profiling #development-tools #programming-resources
-
-Keywords: Java Performance Analyzer, Code Analysis Tool, Performance Metrics, Algorithm Analysis, Memory Usage Tracker, Execution Time Analysis, Java Development Tools, Performance Optimization Software, Code Benchmarking Tool, Java Programming Resources
