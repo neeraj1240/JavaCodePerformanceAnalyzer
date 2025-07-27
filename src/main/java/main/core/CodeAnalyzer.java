@@ -1,12 +1,15 @@
 package main.core;
 
+
+
 import java.io.*;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Random;
 import java.util.concurrent.TimeUnit;
-import java.util.regex.Pattern;
 import java.util.regex.Matcher;
-
-
+import java.util.regex.Pattern;
+import main.core.AnalysisResult;
 
 public class CodeAnalyzer {
     private static final int WARMUP_RUNS = 3;
@@ -35,21 +38,13 @@ public class CodeAnalyzer {
             "been","call","who","oil","its","now","find","long","down","day","did",
             "get","come","made","may","part"};
 
-
     public boolean hasMainMethod(String code) {
         return Pattern.compile("public\\s+static\\s+void\\s+main\\s*\\(\\s*String\\s*\\[\\s*\\]\\s*\\w+\\s*\\)")
                 .matcher(code)
                 .find();
     }
 
-
     public AnalysisResult analyzeCode(String code, String input) throws Exception {
-
-        if ("HARDCODED".equals(input)) {
-            this.generatedInput = "Using hardcoded input from code";
-        }
-
-
         String className = extractClassName(code);
         if (className == null) {
             throw new Exception("Could not find class name in the code.");
@@ -59,57 +54,109 @@ public class CodeAnalyzer {
         File sourceFile = new File(tempDir, className + ".java");
 
         try {
-
             try (PrintWriter writer = new PrintWriter(sourceFile)) {
                 writer.println(code);
             }
-
 
             String compilationError = compileCode(sourceFile);
             if (compilationError != null) {
                 throw new Exception("Compilation failed: " + compilationError);
             }
 
+            if (input.startsWith("generate:")) {
+                String[] parts = input.split(":", 3);
+                if (parts.length == 3 && parts[0].equals("generate")) {
+                    String inputType = parts[1];
+                    String[] sizesStr = parts[2].split(",");
+                    int[] sizes = new int[sizesStr.length];
+                    for (int i = 0; i < sizesStr.length; i++) {
+                        sizes[i] = Integer.parseInt(sizesStr[i]);
+                    }
+                    List<double[]> measurements = new ArrayList<>();
+                    for (int size : sizes) {
+                        String generatedInput = generateInputForType(inputType, size);
+                        // Warm-up runs
+                        for (int i = 0; i < WARMUP_RUNS; i++) {
+                            executeAndMeasure(tempDir, className, generatedInput);
+                        }
+                        double totalTime = 0;
+                        double totalMemory = 0;
+                        System.gc();
+                        Thread.sleep(100);
+                        for (int i = 0; i < MEASUREMENT_RUNS; i++) {
+                            PerformanceMetrics metrics = executeAndMeasure(tempDir, className, generatedInput);
+                            totalTime += metrics.executionTime;
+                            totalMemory += metrics.memoryUsed;
+                        }
+                        double avgTime = totalTime / MEASUREMENT_RUNS;
+                        double avgMemory = totalMemory / MEASUREMENT_RUNS;
+                        measurements.add(new double[]{size, avgTime, avgMemory});
+                        this.generatedInput = generatedInput;
+                    }
 
-            for (int i = 0; i < WARMUP_RUNS; i++) {
-                executeAndMeasure(tempDir, className, input);
+                    double[] sizesArr = new double[measurements.size()];
+                    double[] times = new double[measurements.size()];
+                    double[] memories = new double[measurements.size()];
+                    for (int i = 0; i < measurements.size(); i++) {
+                        sizesArr[i] = measurements.get(i)[0];
+                        times[i] = measurements.get(i)[1];
+                        memories[i] = measurements.get(i)[2];
+                    }
+                    String timeComplexity = inferComplexity(sizesArr, times);
+                    String spaceComplexity = inferComplexity(sizesArr, memories);
+
+                    // Return result with last measurement and its size
+                    double lastAvgTime = times[times.length - 1];
+                    double lastAvgMemory = memories[memories.length - 1];
+                    int lastSize = (int)sizesArr[sizesArr.length - 1];
+                    return new AnalysisResult(lastAvgTime, lastAvgMemory, timeComplexity, spaceComplexity, lastSize);
+                } else {
+                    throw new Exception("Invalid input format for detailed analysis");
+                }
+            } else {
+                int inputSize = 0;
+                if ("HARDCODED".equals(input)) {
+                    this.generatedInput = "Using hardcoded input from code";
+                } else {
+                    this.generatedInput = input;
+                    // Try to determine input size from the input string
+                    if (input.trim().split("\\s+").length > 1) {
+                        try {
+                            inputSize = Integer.parseInt(input.trim().split("\\s+")[0]);
+                        } catch (NumberFormatException e) {
+                            // If we can't parse the size, count the number of elements
+                            inputSize = input.trim().split("\\s+").length;
+                        }
+                    }
+                }
+
+                for (int i = 0; i < WARMUP_RUNS; i++) {
+                    executeAndMeasure(tempDir, className, input);
+                }
+                double totalTime = 0;
+                double totalMemory = 0;
+                PerformanceMetrics lastMetrics = null;
+                System.gc();
+                Thread.sleep(100);
+                for (int i = 0; i < MEASUREMENT_RUNS; i++) {
+                    lastMetrics = executeAndMeasure(tempDir, className, input);
+                    totalTime += lastMetrics.executionTime;
+                    totalMemory += lastMetrics.memoryUsed;
+                }
+                double avgTime = totalTime / MEASUREMENT_RUNS;
+                double avgMemory = totalMemory / MEASUREMENT_RUNS;
+                ComplexityAnalyzer analyzer = new ComplexityAnalyzer();
+                String timeComplexity = analyzer.analyzeTimeComplexity(code);
+                String spaceComplexity = analyzer.analyzeSpaceComplexity(code);
+                return new AnalysisResult(avgTime, avgMemory, timeComplexity, spaceComplexity, inputSize);
             }
-
-
-            double totalTime = 0;
-            double totalMemory = 0;
-            PerformanceMetrics lastMetrics = null;
-
-            System.gc();
-            Thread.sleep(100);
-
-            for (int i = 0; i < MEASUREMENT_RUNS; i++) {
-                lastMetrics = executeAndMeasure(tempDir, className, input);
-                totalTime += lastMetrics.executionTime;
-                totalMemory += lastMetrics.memoryUsed;
-            }
-
-
-            double avgTime = totalTime / MEASUREMENT_RUNS;
-            double avgMemory = totalMemory / MEASUREMENT_RUNS;
-
-            ComplexityAnalyzer a = new ComplexityAnalyzer();
-            String timeComplexity = a.analyzeTimeComplexity(code);
-            String spaceComplexity = a.analyzeSpaceComplexity(code);
-
-            return new AnalysisResult(avgTime, avgMemory, timeComplexity, spaceComplexity);
-
         } finally {
-
             deleteDirectory(tempDir);
         }
     }
 
-
     public boolean hasHardcodedInput(String code) {
-
         String[] patterns = {
-
                 "\\{\\s*\\d+\\s*,.*?\\}",
                 "new\\s+(?:int|String|double|float|char)\\s*\\[\\s*\\]\\s*=\\s*\\{[^}]+\\}",
                 "Arrays\\.asList\\([^)]+\\)",
@@ -126,20 +173,10 @@ public class CodeAnalyzer {
             }
         }
 
-
         return code.contains("int[] arr") && code.contains("{") && code.contains("}");
     }
 
-
-
-
-
-
-
-
     public class ComplexityAnalyzer {
-
-
         private static final String LOOP_PATTERN = "for\\s*\\(|while\\s*\\(";
         private static final String BINARY_SEARCH_PATTERN = "mid\\s*=|middle\\s*=|/\\s*2";
         private static final String DIVIDE_PATTERN = "divide|split|partition|mid";
@@ -152,13 +189,12 @@ public class CodeAnalyzer {
         private static final String HEAP_PATTERN = "heap\\s*(sort|ify)|priority.*queue";
         private static final String QUICK_SORT_PATTERN = "(?s).*quick.*sort.*|.*partition.*pivot.*";
         private static final String BINARY_TREE_PATTERN = "(?s).*tree\\.*(insert|search|delete).*|.*BST.*|.*binary.*search.*tree.*";
-
+        private static final String GRAPH_PATTERN = "(?s).*graph.*|.*adj.*list.*|.*edge.*|.*vertex.*";
 
         private static final String QUEUE_PATTERN = "Queue|PriorityQueue|Deque|ArrayDeque";
         private static final String STACK_PATTERN = "Stack|push\\s*\\(|pop\\s*\\(";
         private static final String TREE_PATTERN = "TreeNode|TreeMap|TreeSet";
         private static final String BST_PATTERN = "BinarySearchTree|BST";
-
 
         private static final String ARRAYS_SORT_PATTERN = "Arrays\\.sort\\s*\\(";
         private static final String COLLECTIONS_SORT_PATTERN = "Collections\\.sort\\s*\\(";
@@ -175,7 +211,8 @@ public class CodeAnalyzer {
             DYNAMIC_PROGRAMMING,
             DIVIDE_AND_CONQUER,
             RECURSIVE,
-            ITERATIVE
+            ITERATIVE,
+            GRAPH
         }
 
         public String analyzeTimeComplexity(String code) {
@@ -186,13 +223,15 @@ public class CodeAnalyzer {
                 return "O(n log n)";
             }
 
-
             if (Pattern.compile(BINARY_TREE_PATTERN, Pattern.CASE_INSENSITIVE).matcher(code).find() ||
                     (Pattern.compile(BINARY_SEARCH_PATTERN).matcher(code).find() &&
                             !Pattern.compile(LOOP_PATTERN).matcher(code).find())) {
                 return "O(log n)";
             }
 
+            if (Pattern.compile(GRAPH_PATTERN, Pattern.CASE_INSENSITIVE).matcher(code).find()) {
+                return analyzeGraphComplexity(code);
+            }
 
             AlgorithmPattern pattern = identifyAlgorithmPattern(code);
 
@@ -205,6 +244,8 @@ public class CodeAnalyzer {
                     return analyzeDivideAndConquerComplexity(code);
                 case RECURSIVE:
                     return analyzeRecursiveComplexity(code);
+                case GRAPH:
+                    return analyzeGraphComplexity(code);
                 default:
                     return analyzeIterativeComplexity(code);
             }
@@ -224,17 +265,17 @@ public class CodeAnalyzer {
             if (Pattern.compile(RECURSIVE_PATTERN).matcher(code).find()) {
                 return AlgorithmPattern.RECURSIVE;
             }
+            if (Pattern.compile(GRAPH_PATTERN).matcher(code).find()) {
+                return AlgorithmPattern.GRAPH;
+            }
             return AlgorithmPattern.ITERATIVE;
         }
 
         private String analyzeBacktrackingComplexity(String code) {
             int decisionPoints = countDecisionPoints(code);
-
-
             if (code.contains("board[") && decisionPoints > 1) {
                 return "O(N!)";
             }
-
             return "O(" + decisionPoints + "^N)";
         }
 
@@ -262,23 +303,36 @@ public class CodeAnalyzer {
             return maxLoopDepth > 1 ? "O(n^" + maxLoopDepth + ")" : "O(n)";
         }
 
-        public String analyzeSpaceComplexity(String code) {
+        private String analyzeGraphComplexity(String code) {
+            if (code.contains("bfs") || code.contains("BFS")) {
+                return "O(V + E)";
+            }
+            if (code.contains("dfs") || code.contains("DFS")) {
+                return "O(V + E)";
+            }
+            if (code.contains("dijkstra") || code.contains("Dijkstra")) {
+                return "O((V + E) log V)";
+            }
+            return "O(V^2)";
+        }
 
+        public String analyzeSpaceComplexity(String code) {
             if (Pattern.compile(TREE_PATTERN).matcher(code).find() ||
                     Pattern.compile(BST_PATTERN).matcher(code).find()) {
                 return "O(n)";
             }
 
-
             if (Pattern.compile(HEAP_PATTERN).matcher(code).find()) {
                 return "O(n)";
             }
-
 
             if (Pattern.compile(MATRIX_PATTERN).matcher(code).find()) {
                 return "O(n^2)";
             }
 
+            if (Pattern.compile(GRAPH_PATTERN).matcher(code).find()) {
+                return "O(V + E)";
+            }
 
             if (Pattern.compile(ARRAYS_SORT_PATTERN).matcher(code).find()) {
                 if (code.contains("mergeSort") || code.contains("MergeSort")) {
@@ -293,12 +347,10 @@ public class CodeAnalyzer {
                 return "O(log n)";
             }
 
-
             if (Pattern.compile(QUEUE_PATTERN).matcher(code).find() ||
                     Pattern.compile(STACK_PATTERN).matcher(code).find()) {
                 return "O(n)";
             }
-
 
             int dataStructureCount = countDataStructures(code);
             if (dataStructureCount > 1) {
@@ -366,16 +418,7 @@ public class CodeAnalyzer {
         }
     }
 
-
-
-
-
-
-
-
-
     private String extractClassName(String code) {
-
         Pattern pattern = Pattern.compile("public\\s+class\\s+(\\w+)");
         Matcher matcher = pattern.matcher(code);
         if (matcher.find()) {
@@ -400,7 +443,6 @@ public class CodeAnalyzer {
         compileBuilder.redirectErrorStream(true);
         Process compileProcess = compileBuilder.start();
 
-
         StringBuilder output = new StringBuilder();
         try (BufferedReader reader = new BufferedReader(new InputStreamReader(compileProcess.getInputStream()))) {
             String line;
@@ -423,10 +465,14 @@ public class CodeAnalyzer {
     }
 
     public String generateInput(String code, int size) {
+        return generateInput(code, size, "random");
+    }
+
+    public String generateInput(String code, int size, String arrayType) {
         StringBuilder input = new StringBuilder();
+        String dataType = detectDataType(code);
 
         if (hasSingleStringInput(code)) {
-
             StringBuilder sentence = new StringBuilder();
             for (int i = 0; i < size; i++) {
                 sentence.append(COMMON_WORDS[random.nextInt(COMMON_WORDS.length)]);
@@ -436,14 +482,11 @@ public class CodeAnalyzer {
             }
             input.append(sentence);
         } else if (code.contains("Scanner")) {
-
             if (code.contains("matrix") || code.contains("[][]")) {
                 int matrixDim = Math.min(size, 100);
 
-
                 input.append(matrixDim).append("\n");
                 input.append(matrixDim).append("\n");
-
 
                 for (int i = 0; i < matrixDim; i++) {
                     for (int j = 0; j < matrixDim; j++) {
@@ -458,7 +501,6 @@ public class CodeAnalyzer {
                     input.append("\n");
                 }
             } else {
-
                 Pattern arrayPattern = Pattern.compile("(\\w+)\\s*=\\s*new\\s+(\\w+)\\s*\\[");
                 Matcher arrayMatcher = arrayPattern.matcher(code);
                 int arrayCount = 0;
@@ -466,16 +508,13 @@ public class CodeAnalyzer {
                     arrayCount++;
                 }
 
-
                 if (arrayCount > 1) {
-
                     input.append(size).append("\n");
 
                     for (int i = 0; i < size; i++) {
                         input.append(random.nextInt(100)).append(" ");
                     }
                     input.append("\n");
-
 
                     input.append(size).append("\n");
 
@@ -484,7 +523,6 @@ public class CodeAnalyzer {
                     }
                     input.append("\n");
                 } else {
-
                     Pattern nextIntPattern = Pattern.compile("nextInt\\(\\)");
                     Matcher nextIntMatcher = nextIntPattern.matcher(code);
                     int nextIntCount = 0;
@@ -519,9 +557,6 @@ public class CodeAnalyzer {
         return input.toString();
     }
 
-
-
-
     private boolean hasSingleStringInput(String code) {
         return (code.contains("scanner.nextLine()") ||
                 code.contains("Scanner") && code.contains("nextLine()")) &&
@@ -530,29 +565,21 @@ public class CodeAnalyzer {
                 !code.contains("next()");
     }
 
-
-
-
-
     private boolean isNumericInputRequired(String code) {
-
         boolean hasStringIndicators = code.contains("String ") ||
                 code.contains("nextLine()") ||
                 code.contains("charAt(") ||
                 code.contains("length()");
 
-
         if (hasStringIndicators) {
             return false;
         }
-
 
         return code.contains("parseInt") ||
                 code.contains("Integer") ||
                 code.contains("int ") ||
                 code.contains("nextInt()");
     }
-
 
     private PerformanceMetrics executeAndMeasure(File directory, String className, String input) throws Exception {
         ProcessBuilder runBuilder = new ProcessBuilder(
@@ -565,7 +592,6 @@ public class CodeAnalyzer {
                 className
         );
         runBuilder.redirectErrorStream(true);
-
 
         for (int i = 0; i < 3; i++) {
             System.gc();
@@ -581,7 +607,6 @@ public class CodeAnalyzer {
 
         Process runProcess = runBuilder.start();
         StringBuilder output = new StringBuilder();
-
 
         Thread inputThread = new Thread(() -> {
             try (BufferedWriter writer = new BufferedWriter(
@@ -610,14 +635,11 @@ public class CodeAnalyzer {
             }
         });
 
-
         inputThread.start();
         outputThread.start();
 
-
         inputThread.join();
         outputThread.join();
-
 
         if (!runProcess.waitFor(10, TimeUnit.SECONDS)) {
             runProcess.destroyForcibly();
@@ -643,8 +665,6 @@ public class CodeAnalyzer {
         );
     }
 
-
-
     private void deleteDirectory(File directory) {
         File[] files = directory.listFiles();
         if (files != null) {
@@ -653,6 +673,157 @@ public class CodeAnalyzer {
             }
         }
         directory.delete();
+    }
+
+    private String generateInputForType(String inputType, int size) {
+        StringBuilder sb = new StringBuilder();
+        String[] parts = inputType.split(":");
+        String baseType = parts[0];
+        String arrayType = parts.length > 1 ? parts[1] : "random";
+
+        if ("array".equals(baseType)) {
+            sb.append(size).append("\n");
+            int[] array = new int[size];
+            
+            // Generate initial array based on type
+            switch (arrayType) {
+                case "sorted":
+                    for (int i = 0; i < size; i++) {
+                        array[i] = i;
+                    }
+                    break;
+                case "nearly-sorted":
+                    for (int i = 0; i < size; i++) {
+                        array[i] = i;
+                    }
+                    // Swap some elements to make it nearly sorted
+                    int swaps = size / 10; // Swap 10% of elements
+                    for (int i = 0; i < swaps; i++) {
+                        int pos1 = random.nextInt(size);
+                        int pos2 = Math.min(size - 1, pos1 + random.nextInt(3) + 1);
+                        int temp = array[pos1];
+                        array[pos1] = array[pos2];
+                        array[pos2] = temp;
+                    }
+                    break;
+                case "random":
+                default:
+                    for (int i = 0; i < size; i++) {
+                        array[i] = random.nextInt(100);
+                    }
+                    break;
+            }
+            
+            // Convert array to string
+            for (int value : array) {
+                sb.append(value).append(" ");
+            }
+            sb.append("\n");
+        } else if ("matrix".equals(baseType)) {
+            sb.append(size).append(" ").append(size).append("\n");
+            for (int i = 0; i < size; i++) {
+                for (int j = 0; j < size; j++) {
+                    sb.append(random.nextInt(100)).append(" ");
+                }
+                sb.append("\n");
+            }
+        } else if ("string".equals(baseType)) {
+            String chars = "abcdefghijklmnopqrstuvwxyz";
+            for (int i = 0; i < size; i++) {
+                sb.append(chars.charAt(random.nextInt(chars.length())));
+            }
+            sb.append("\n");
+        } else {
+            throw new IllegalArgumentException("Unsupported input_type: " + baseType);
+        }
+        return sb.toString();
+    }
+
+    private String detectDataType(String code) {
+        if (code.contains("char[]") || code.contains("Character[]")) {
+            return "char";
+        } else if (code.contains("String[]")) {
+            return "string";
+        } else {
+            return "int"; // Default to int if no specific type is found
+        }
+    }
+
+    private String inferComplexity(double[] sizes, double[] values) {
+        String[] complexities = {"O(1)", "O(log n)", "O(n)", "O(n log n)", "O(n^2)"};
+        double minCv = Double.POSITIVE_INFINITY;
+        String bestComplexity = "O(n)"; // Default fallback
+
+        for (String complexity : complexities) {
+            double[] expected = new double[sizes.length];
+            for (int i = 0; i < sizes.length; i++) {
+                double n = sizes[i];
+                switch (complexity) {
+                    case "O(1)":
+                        expected[i] = 1;
+                        break;
+                    case "O(log n)":
+                        expected[i] = Math.log(n) / Math.log(2);
+                        break;
+                    case "O(n)":
+                        expected[i] = n;
+                        break;
+                    case "O(n log n)":
+                        expected[i] = n * Math.log(n) / Math.log(2);
+                        break;
+                    case "O(n^2)":
+                        expected[i] = n * n;
+                        break;
+                }
+            }
+
+
+            double[] normalizedValues = normalize(values);
+            double[] normalizedExpected = normalize(expected);
+
+
+            double mse = 0;
+            for (int i = 0; i < values.length; i++) {
+                mse += Math.pow(normalizedValues[i] - normalizedExpected[i], 2);
+            }
+            mse /= values.length;
+
+
+            double mean = 0;
+            for (double val : normalizedValues) {
+                mean += val;
+            }
+            mean /= normalizedValues.length;
+            double variance = 0;
+            for (double val : normalizedValues) {
+                variance += Math.pow(val - mean, 2);
+            }
+            variance /= normalizedValues.length;
+            double stdDev = Math.sqrt(variance);
+            double cv = mean != 0 ? stdDev / mean : Double.POSITIVE_INFINITY;
+
+
+            double score = mse + cv;
+            if (score < minCv) {
+                minCv = score;
+                bestComplexity = complexity;
+            }
+        }
+
+        return bestComplexity;
+    }
+
+    private double[] normalize(double[] values) {
+        double max = 0;
+        for (double val : values) {
+            if (val > max) max = val;
+        }
+        if (max == 0) return values;
+        double[] normalized = new double[values.length];
+        for (int i = 0; i < values.length; i++) {
+            normalized[i] = values[i] / max;
+        }
+        return normalized;
     }
 
     private static class PerformanceMetrics {
@@ -665,7 +836,3 @@ public class CodeAnalyzer {
         }
     }
 }
-
-
-
-
