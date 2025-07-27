@@ -1,5 +1,8 @@
 package main.ui;
+
 import javafx.application.Application;
+import javafx.application.Platform;
+import javafx.concurrent.Task;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Scene;
@@ -8,11 +11,9 @@ import javafx.scene.image.Image;
 import javafx.scene.layout.*;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
-import main.core.CodeAnalyzer;
-import main.core.AnalysisResult;
-import javafx.concurrent.Task;
 import java.util.*;
-import javafx.application.Platform;
+import main.core.AnalysisResult;
+import main.core.CodeAnalyzer;
 
 
 public class CodeAnalyzerUI extends Application {
@@ -39,6 +40,14 @@ public class CodeAnalyzerUI extends Application {
     private TextArea manualInputArea;
     private Label manualInputLabel;
     private RadioButton hardcodedInputRadio;
+
+    private TextField minSizeField;
+    private TextField maxSizeField;
+    private TextField stepSizeField;
+    private RadioButton singleInputRadio;
+    private RadioButton rangeInputRadio;
+    private VBox rangeInputBox;
+    private ComboBox<String> arrayTypeComboBox;
 
     @Override
     public void start(Stage primaryStage) {
@@ -95,33 +104,49 @@ public class CodeAnalyzerUI extends Application {
         codeInputArea.getStyleClass().add("code-input");
         codeInputArea.setWrapText(true);
         codeInputArea.setPrefRowCount(20);
+        codeInputArea.setStyle("-fx-control-inner-background: #333333; -fx-text-fill: #ffffff; -fx-font-family: 'Consolas', monospace;");
+
+
+        ToggleGroup inputTypeGroup = new ToggleGroup();
+        singleInputRadio = new RadioButton("Single Input");
+        rangeInputRadio = new RadioButton("Input Range");
+        singleInputRadio.getStyleClass().add("radio-button");
+        rangeInputRadio.getStyleClass().add("radio-button");
+        singleInputRadio.setToggleGroup(inputTypeGroup);
+        rangeInputRadio.setToggleGroup(inputTypeGroup);
+        singleInputRadio.setSelected(true);
+
+        HBox inputTypeBox = new HBox(10, singleInputRadio, rangeInputRadio);
+        inputTypeBox.setAlignment(Pos.CENTER_LEFT);
+        inputTypeBox.getStyleClass().add("input-section-box");
 
 
         manualInputRadio = new RadioButton("Manual Input");
         randomInputRadio = new RadioButton("Random Input");
         hardcodedInputRadio = new RadioButton("Hardcoded Input");
-        ToggleGroup inputTypeGroup = new ToggleGroup();
-        manualInputRadio.setToggleGroup(inputTypeGroup);
-        randomInputRadio.setToggleGroup(inputTypeGroup);
-        hardcodedInputRadio.setToggleGroup(inputTypeGroup);
-        randomInputRadio.setSelected(true); // Default to random input
+        manualInputRadio.getStyleClass().add("radio-button");
+        randomInputRadio.getStyleClass().add("radio-button");
+        hardcodedInputRadio.getStyleClass().add("radio-button");
+        ToggleGroup singleInputGroup = new ToggleGroup();
+        manualInputRadio.setToggleGroup(singleInputGroup);
+        randomInputRadio.setToggleGroup(singleInputGroup);
+        hardcodedInputRadio.setToggleGroup(singleInputGroup);
+        randomInputRadio.setSelected(true);
 
-        manualInputRadio.setOnAction(e -> toggleInputFields());
-        randomInputRadio.setOnAction(e -> toggleInputFields());
-        hardcodedInputRadio.setOnAction(e -> toggleInputFields());
-
-        HBox inputTypeBox = new HBox(10, manualInputRadio, randomInputRadio, hardcodedInputRadio);
-        inputTypeBox.setAlignment(Pos.CENTER_LEFT);
+        HBox singleInputBox = new HBox(10, manualInputRadio, randomInputRadio, hardcodedInputRadio);
+        singleInputBox.setAlignment(Pos.CENTER_LEFT);
+        singleInputBox.getStyleClass().add("input-section-box");
 
 
-        manualInputLabel = new Label("Manual Input Data:");
-        manualInputLabel.setStyle("-fx-text-fill: #f0f0f0;");
-        manualInputArea = new TextArea();
-        manualInputArea.setWrapText(true);
-        manualInputArea.setPrefRowCount(5);
-        manualInputArea.getStyleClass().add("manual-input-area");
-        manualInputArea.setDisable(true); // Initially disabled
-        manualInputArea.setVisible(false); // Initially hidden
+        HBox arrayTypeBox = new HBox(10);
+        arrayTypeBox.setAlignment(Pos.CENTER_LEFT);
+        Label arrayTypeLabel = new Label("Array Type:");
+        arrayTypeLabel.setStyle("-fx-text-fill: #f0f0f0;");
+        arrayTypeComboBox = new ComboBox<>();
+        arrayTypeComboBox.getItems().addAll("Random", "Sorted", "Nearly Sorted");
+        arrayTypeComboBox.setValue("Random");
+        arrayTypeComboBox.setStyle("-fx-text-fill: black; -fx-background-color: white;");
+        arrayTypeBox.getChildren().addAll(arrayTypeLabel, arrayTypeComboBox);
 
 
         HBox inputSizeBox = new HBox(10);
@@ -131,9 +156,59 @@ public class CodeAnalyzerUI extends Application {
         inputSizeField = new TextField();
         inputSizeField.setPrefWidth(100);
         inputSizeField.setStyle("-fx-text-fill: black; -fx-background-color: white;");
-        inputSizeField.setDisable(false); // Initially enabled
-
         inputSizeBox.getChildren().addAll(sizeLabel, inputSizeField);
+
+
+        Label minSizeLabel = new Label("Min Size:");
+        minSizeLabel.getStyleClass().add("text-field-label");
+        minSizeField = new TextField();
+        minSizeField.setPrefWidth(100);
+        minSizeField.getStyleClass().add("text-field");
+
+        Label maxSizeLabel = new Label("Max Size:");
+        maxSizeLabel.getStyleClass().add("text-field-label");
+        maxSizeField = new TextField();
+        maxSizeField.setPrefWidth(100);
+        maxSizeField.getStyleClass().add("text-field");
+
+        Label stepSizeLabel = new Label("Step Size:");
+        stepSizeLabel.getStyleClass().add("text-field-label");
+        stepSizeField = new TextField();
+        stepSizeField.setPrefWidth(100);
+        stepSizeField.getStyleClass().add("text-field");
+
+        GridPane rangeInputGrid = new GridPane();
+        rangeInputGrid.setHgap(10);
+        rangeInputGrid.setVgap(5);
+        rangeInputGrid.getStyleClass().add("range-input-grid");
+        rangeInputGrid.add(minSizeLabel, 0, 0);
+        rangeInputGrid.add(minSizeField, 1, 0);
+        rangeInputGrid.add(maxSizeLabel, 2, 0);
+        rangeInputGrid.add(maxSizeField, 3, 0);
+        rangeInputGrid.add(stepSizeLabel, 0, 1);
+        rangeInputGrid.add(stepSizeField, 1, 1);
+
+        rangeInputBox = new VBox(5, rangeInputGrid);
+        rangeInputBox.getStyleClass().add("input-section-box");
+        rangeInputBox.setVisible(false);
+
+
+        manualInputLabel = new Label("Manual Input Data:");
+        manualInputLabel.getStyleClass().add("text-field-label");
+        manualInputLabel.setStyle("-fx-text-fill: #f0f0f0;");
+        manualInputArea = new TextArea();
+        manualInputArea.setWrapText(true);
+        manualInputArea.setPrefRowCount(5);
+        manualInputArea.getStyleClass().add("manual-input-area");
+        manualInputArea.setDisable(true);
+        manualInputArea.setVisible(false);
+
+
+        singleInputRadio.setOnAction(e -> toggleInputMode());
+        rangeInputRadio.setOnAction(e -> toggleInputMode());
+        manualInputRadio.setOnAction(e -> toggleInputFields());
+        randomInputRadio.setOnAction(e -> toggleInputFields());
+        hardcodedInputRadio.setOnAction(e -> toggleInputFields());
 
         Button analyzeButton = new Button("Analyze");
         analyzeButton.getStyleClass().add("analyze-button");
@@ -147,24 +222,23 @@ public class CodeAnalyzerUI extends Application {
         buttonBox.getChildren().addAll(analyzeButton, clearButton);
         buttonBox.setAlignment(Pos.CENTER_LEFT);
 
-
         Region spacer = new Region();
         VBox.setVgrow(spacer, Priority.ALWAYS);
 
-
         HBox userManualBox = new HBox();
         userManualBox.setAlignment(Pos.CENTER_RIGHT);
-
         Button userManualButton = new Button("User Manual");
         userManualButton.getStyleClass().add("user-manual-button");
         userManualButton.setOnAction(e -> showUserManual());
-
         userManualBox.getChildren().add(userManualButton);
 
         leftPane.getChildren().addAll(
                 titleLabel,
                 codeInputArea,
                 inputTypeBox,
+                singleInputBox,
+                arrayTypeBox,
+                rangeInputBox,
                 manualInputLabel,
                 manualInputArea,
                 inputSizeBox,
@@ -180,7 +254,6 @@ public class CodeAnalyzerUI extends Application {
         UserManualUI userManual = new UserManualUI();
         userManual.show();
     }
-
 
     private void toggleInputFields() {
         if (manualInputRadio.isSelected()) {
@@ -205,6 +278,25 @@ public class CodeAnalyzerUI extends Application {
         }
     }
 
+    private void toggleInputMode() {
+        if (singleInputRadio.isSelected()) {
+            rangeInputBox.setVisible(false);
+            manualInputRadio.setDisable(false);
+            randomInputRadio.setDisable(false);
+            hardcodedInputRadio.setDisable(false);
+            toggleInputFields();
+        } else if (rangeInputRadio.isSelected()) {
+            rangeInputBox.setVisible(true);
+            manualInputRadio.setDisable(true);
+            randomInputRadio.setDisable(true);
+            hardcodedInputRadio.setDisable(true);
+            manualInputArea.setDisable(true);
+            manualInputArea.setVisible(false);
+            manualInputLabel.setVisible(false);
+            inputSizeField.setDisable(true);
+            inputSizeField.setVisible(false);
+        }
+    }
 
     private VBox createRightPane() {
         VBox rightPane = new VBox(10);
@@ -222,12 +314,10 @@ public class CodeAnalyzerUI extends Application {
         analyzingLabel.getStyleClass().add("analyzing-label");
         analyzingLabel.setVisible(false);
 
-
         timeUnitComboBox = new ComboBox<>();
         timeUnitComboBox.getItems().addAll("Milliseconds", "Seconds", "Minutes");
         timeUnitComboBox.setValue("Milliseconds");
         timeUnitComboBox.setStyle("-fx-background-color: #3c3c3c; -fx-text-fill: white;");
-
 
         timeUnitComboBox.setOnMouseEntered(e ->
                 timeUnitComboBox.setStyle("-fx-background-color: #4c4c4c; -fx-text-fill: white; -fx-cursor: hand;"));
@@ -246,7 +336,6 @@ public class CodeAnalyzerUI extends Application {
                 }
             }
         });
-
 
         timeUnitComboBox.setCellFactory(listView -> {
             ListCell<String> cell = new ListCell<String>() {
@@ -268,12 +357,10 @@ public class CodeAnalyzerUI extends Application {
             return cell;
         });
 
-
         memoryUnitComboBox = new ComboBox<>();
         memoryUnitComboBox.getItems().addAll("Bytes", "Kilobytes", "Megabytes");
         memoryUnitComboBox.setValue("Bytes");
         memoryUnitComboBox.setStyle("-fx-background-color: #3c3c3c; -fx-text-fill: white;");
-
 
         memoryUnitComboBox.setOnMouseEntered(e ->
                 memoryUnitComboBox.setStyle("-fx-background-color: #4c4c4c; -fx-text-fill: white; -fx-cursor: hand;"));
@@ -293,7 +380,6 @@ public class CodeAnalyzerUI extends Application {
             }
         });
 
-
         memoryUnitComboBox.setCellFactory(listView -> {
             ListCell<String> cell = new ListCell<String>() {
                 @Override
@@ -302,7 +388,6 @@ public class CodeAnalyzerUI extends Application {
                     if (item != null) {
                         setText(item);
                         setStyle("-fx-text-fill: white; -fx-font-family: 'Segoe UI Light'; -fx-font-size: 13px; -fx-background-color: #2b2b2b;");
-
 
                         setOnMouseEntered(e ->
                                 setStyle("-fx-text-fill: white; -fx-font-family: 'Segoe UI Light'; -fx-font-size: 13px; -fx-background-color: #4c4c4c; -fx-cursor: hand;"));
@@ -313,9 +398,6 @@ public class CodeAnalyzerUI extends Application {
             };
             return cell;
         });
-
-
-
 
         HBox dataButtonsBox = new HBox(10);
         dataButtonsBox.setAlignment(Pos.CENTER);
@@ -329,7 +411,6 @@ public class CodeAnalyzerUI extends Application {
         showOutputButton.setOnAction(e -> showOutputData());
 
         dataButtonsBox.getChildren().addAll(showInputButton, showOutputButton);
-
 
         displayDefaultResults();
 
@@ -384,12 +465,15 @@ public class CodeAnalyzerUI extends Application {
 
         Label titleLabel = new Label(title);
         titleLabel.getStyleClass().add("title-label");
+        titleLabel.setStyle("-fx-text-fill: #f0f0f0;");
 
         TextArea dataArea = new TextArea(data);
         dataArea.setEditable(false);
         dataArea.setWrapText(true);
         dataArea.setPrefRowCount(20);
         dataArea.getStyleClass().add("data-area");
+        // Set text and background colors for better visibility
+        dataArea.setStyle("-fx-control-inner-background: #2b2b2b; -fx-text-fill: #ffffff; -fx-font-family: 'Consolas', monospace; -fx-font-size: 13px;");
 
         Button closeButton = new Button("Close");
         closeButton.getStyleClass().add("close-button");
@@ -407,9 +491,6 @@ public class CodeAnalyzerUI extends Application {
 
     private void analyzeCode() {
         String code = codeInputArea.getText();
-        String manualInput = manualInputArea.getText();
-        String inputSizeText = inputSizeField.getText();
-
         if (code.isEmpty()) {
             showError("Please enter code to analyze.");
             return;
@@ -420,11 +501,18 @@ public class CodeAnalyzerUI extends Application {
             return;
         }
 
+        if (rangeInputRadio.isSelected()) {
+            analyzeCodeWithRange(code);
+            return;
+        }
+
+        String manualInput = manualInputArea.getText();
+        String inputSizeText = inputSizeField.getText();
+
         try {
 
             final String finalInput;
             final int finalInputSize;
-
 
             if (manualInputRadio.isSelected()) {
                 if (manualInput.isEmpty()) {
@@ -443,7 +531,18 @@ public class CodeAnalyzerUI extends Application {
                     showError("Input size cannot exceed 100,000");
                     return;
                 }
-                finalInput = analyzer.generateInput(code, inputSize);
+                String arrayType = "random";
+                switch (arrayTypeComboBox.getValue()) {
+                    case "Sorted Array":
+                        arrayType = "sorted";
+                        break;
+                    case "Nearly Sorted Array":
+                        arrayType = "nearly-sorted";
+                        break;
+                    default:
+                        arrayType = "random";
+                }
+                finalInput = analyzer.generateInput(code, inputSize, arrayType);
                 finalInputSize = inputSize;
             } else {
                 if (!analyzer.hasHardcodedInput(code)) {
@@ -493,14 +592,95 @@ public class CodeAnalyzerUI extends Application {
         }
     }
 
+    private void analyzeCodeWithRange(String code) {
+        try {
+            int minSize = Integer.parseInt(minSizeField.getText());
+            int maxSize = Integer.parseInt(maxSizeField.getText());
+            int stepSize = Integer.parseInt(stepSizeField.getText());
 
+            if (minSize <= 0 || maxSize <= 0 || stepSize <= 0) {
+                showError("All size values must be greater than 0.");
+                return;
+            }
+
+            if (minSize >= maxSize) {
+                showError("Maximum size must be greater than minimum size.");
+                return;
+            }
+
+            if (maxSize > 100000) {
+                showError("Maximum size cannot exceed 100,000");
+                return;
+            }
+
+            if (stepSize >= (maxSize - minSize)) {
+                showError("Step size must be smaller than the range between min and max size.");
+                return;
+            }
+
+            clearPreviousData();
+            analyzingLabel.setVisible(true);
+
+            Task<List<AnalysisResult>> analysisTask = new Task<List<AnalysisResult>>() {
+                @Override
+                protected List<AnalysisResult> call() throws Exception {
+                    List<AnalysisResult> results = new ArrayList<>();
+                    for (int currentSize = minSize; currentSize <= maxSize; currentSize += stepSize) {
+                        final int finalSize = currentSize; // Create effectively final copy
+                        updateMessage(String.format("Analyzing size: %d", finalSize));
+                        String input = analyzer.generateInput(code, finalSize);
+                        AnalysisResult result = analyzer.analyzeCode(code, input);
+                        results.add(result);
+
+                        // Update UI with effectively final variable
+                        Platform.runLater(() -> {
+                            executionTimes.add(result.getExecutionTime());
+                            memoryUsages.add(result.getMemoryUsed());
+                            inputSizes.add(finalSize);
+                        });
+                    }
+                    // Set the input data for display
+                    currentInput = analyzer.getGeneratedInput();
+                    return results;
+                }
+            };
+
+            analysisTask.messageProperty().addListener((obs, oldMsg, newMsg) -> {
+                analyzingLabel.setText(newMsg);
+            });
+
+            analysisTask.setOnSucceeded(e -> {
+                analyzingLabel.setVisible(false);
+                analyzingLabel.setText("Analyzing...");
+                List<AnalysisResult> results = analysisTask.getValue();
+                if (!results.isEmpty()) {
+                    // Store the last input/output data
+                    AnalysisResult lastResult = results.get(results.size() - 1);
+                    currentOutput = analyzer.getExecutionOutput();
+                    displayResults(lastResult); // Display the last result
+                }
+            });
+
+            analysisTask.setOnFailed(e -> {
+                analyzingLabel.setVisible(false);
+                Throwable exception = analysisTask.getException();
+                showError(exception.getMessage());
+            });
+
+            new Thread(analysisTask).start();
+
+        } catch (NumberFormatException e) {
+            showError("Please enter valid numbers for min size, max size, and step size.");
+        } catch (Exception e) {
+            showError(e.getMessage());
+        }
+    }
 
     private void displayResults(AnalysisResult result) {
         lastExecutionTime = result.getExecutionTime();
         lastMemoryUsed = result.getMemoryUsed();
 
         resultArea.getChildren().clear();
-
 
         VBox timeBox = new VBox(5);
         timeBox.getStyleClass().add("result-box");
@@ -518,7 +698,6 @@ public class CodeAnalyzerUI extends Application {
         timeGraphBtn.setOnAction(e -> showTimeGraph());
         timeBox.getChildren().addAll(timeLabel, timeUnitBox, timeGraphBtn);
 
-
         VBox memoryBox = new VBox(5);
         memoryBox.getStyleClass().add("result-box");
         Label memoryLabel = new Label(formatMemoryValue(lastMemoryUsed));
@@ -534,7 +713,6 @@ public class CodeAnalyzerUI extends Application {
         memoryGraphBtn.setStyle("-fx-text-fill: #f0f0f0;");
         memoryGraphBtn.setOnAction(e -> showMemoryGraph());
         memoryBox.getChildren().addAll(memoryLabel, memoryUnitBox, memoryGraphBtn);
-
 
         VBox timeComplexityBox = new VBox(5);
         timeComplexityBox.getStyleClass().add("result-box");
@@ -557,7 +735,6 @@ public class CodeAnalyzerUI extends Application {
 
         resultArea.getChildren().clear();
 
-
         VBox timeBox = new VBox(5);
         timeBox.getStyleClass().add("result-box");
         Label timeLabel = new Label(formatTimeValue(0.0));
@@ -573,7 +750,6 @@ public class CodeAnalyzerUI extends Application {
         timeGraphBtn.setStyle("-fx-text-fill: #f0f0f0;");
         timeBox.getChildren().addAll(timeLabel, timeUnitBox, timeGraphBtn);
 
-
         VBox memoryBox = new VBox(5);
         memoryBox.getStyleClass().add("result-box");
         Label memoryLabel = new Label(formatMemoryValue(0.0));
@@ -588,7 +764,6 @@ public class CodeAnalyzerUI extends Application {
         Button memoryGraphBtn = new Button("Show Memory Graph");
         memoryGraphBtn.setStyle("-fx-text-fill: #f0f0f0;");
         memoryBox.getChildren().addAll(memoryLabel, memoryUnitBox, memoryGraphBtn);
-
 
         VBox timeComplexityBox = new VBox(5);
         timeComplexityBox.getStyleClass().add("result-box");
