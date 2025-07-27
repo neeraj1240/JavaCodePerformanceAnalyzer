@@ -1,136 +1,153 @@
 # Java Code Performance Analyzer Tool
 
-A sophisticated desktop application that analyzes Java code performance metrics, including execution time, memory usage, and algorithmic complexity. Features automated test data generation with customizable input sizes up to 100,000 elements, eliminating the need for manual test data creation.
+A sophisticated desktop application that analyzes Java code performance metrics, including execution time and Memory usage. Features automated test data generation with customizable input sizes up to 100,000 elements, eliminating the need for manual test data creation.
 
-## Features
+## Table of Contents
 
-- **Real-time Code Analysis**: Analyze Java code performance with detailed metrics
-- **Multiple Input Options**:
-  - Manual Input
-  - Random Input Generation
-  - Hardcoded Input Support
-- **Performance Metrics**:
-  - Execution Time Analysis
-  - Memory Usage Tracking
-  - Time Complexity Analysis
-  - Space Complexity Analysis
-- **Visualization**:
-  - Time Performance Graphs
-  - Memory Usage Graphs
-- **Flexible Unit Display**:
-  - Time Units (Milliseconds, Seconds, Minutes)
-  - Memory Units (Bytes, Kilobytes, Megabytes)
-- **Input/Output Data Visualization**
-- **User Manual Integration**
+- [Overview](#overview)
+- [Main User Interface](#main-user-interface)
+- [Input Types](#input-types)
+  - [Single Input](#single-input)
+  - [Range Input](#range-input)
+  - [Manual Input](#manual-input)
+  - [Random Input](#random-input)
+  - [Hardcoded Input](#hardcoded-input)
+- [Graphs and Visualizations](#graphs-and-visualizations)
+  - [Execution Time Graph](#execution-time-graph)
+  - [Memory Usage Graph](#memory-usage-graph)
+  - [Combined Execution Time & Memory Usage Results](#combined-execution-time--memory-usage-results)
+- [Data Display](#data-display)
+  - [Input Data](#input-data)
+  - [Output Data](#output-data)
+- [User Manual](#user-manual)
+- [Installation](#installation)
+- [Usage](#usage)
 
+## Overview
 
-## Snapshots
-Experience the Java Code Performance Analyzer Tool through these visual previews:
+The Java Code Performance Analyzer Tool uses Java and JavaFX to evaluate code efficiency. It generates performance graphs from various input types and displays key metrics such as execution time and memory usage.
 
-### Main Interface
-![Main Application Interface](images/menu.png)
-*The main application window showing code input panel and analysis options*
+## Main User Interface
 
-### Performance Analysis
-![Performance Analysis Dashboard](images/result.png)
-*Real-time performance metrics and graphs during code analysis*
+The main UI features:
+- **Code Input Panel:** Paste or write code to be analyzed.
+- **Input Options:** Select input type and adjust parameters.
+- **Results Panel:** View performance metrics including execution time, memory usage, time and space complexity.
+- **Graph Buttons:** Launch dedicated graph windows for further analysis.
 
-### Memory Usage Visualization
-![Memory Usage Tracking](images/memoryusagegraph.png)
-*Detailed memory usage visualization with adjustable units*
+![Main UI](images/mainUI.png)
 
-### Execution Time Visualization
-![Execution time Tracking](images/executiongraph.png)
-*Detailed memory usage visualization with adjustable units*
+## Input Types
 
+The tool provides several input methods:
 
-## Requirements
+![Input Types](images/inputType.png)
 
-- [Java Development Kit (JDK) 8 or higher](https://openjdk.org/projects/jdk/21/)
-- [JavaFX](https://openjfx.io/)
-- Sufficient system memory for code execution and analysis
+### Single Input
+Provide a single dataset to test your program quickly.
+
+### Range Input
+Specify a range with:
+- **Minimum Input Size**
+- **Maximum Input Size**
+- **Step Size**
+
+### Manual Input
+Enter custom test cases directly.
+
+### Random Input
+Generate random test data automatically based on your configuration.
+
+### Hardcoded Input
+Uses predefined test data embedded in the code for consistent benchmarking.
+
+## Graphs and Visualizations
+
+Visualizations help you interpret performance trends:
+
+### Execution Time Graph
+Displays the program's execution time across different input sizes.
+
+![Execution Time Graph](images/executionGraph.png)
+
+### Memory Usage Graph
+Visualizes the memory usage trend.
+
+![Memory Usage Graph](images/memoryGraph.png)
+
+### Combined Execution Time & Memory Usage Results
+A summary view of execution time and memory usage.
+
+![Combined Results](images/executionTimeMemoryUsageResult.png)
+
+## Data Display
+
+### Input Data
+View the test data used for analysis in a dedicated window.
+
+![Input Data](images/inputData.png)
+
+### Output Data
+Review your program's output after analysis.
+
+![Output Data](images/outputData.png)
+
+## User Manual
+
+Detailed usage instructions and guidelines can be found in the integrated user manual. The manual explains:
+- Expected input format
+- Main method requirements
+- Performance analysis techniques
+- Best practices for accurate results
+
+![User Manual](images/userManual.png)
 
 ## Installation
 
-1. Clone the repository:
-git clone https://github.com/neeraj1240/JavaCodePerformanceAnalyzer.git
+1. **Clone the Repository:**
 
-2. Navigate to the project directory:
-cd JavaCodePerformanceAnalyzer
+   ```sh
+   git clone https://github.com/neeraj1240/JavaCodePerformanceAnalyzer.git
+   ```
 
-3. Compile the project:
-javac main/ui/CodeAnalyzerUI.java
+2. **Navigate to the Project Directory:**
 
-4. Run the application:
-java main.ui.CodeAnalyzerUI
+   ```sh
+   cd JavaCodePerformanceAnalyzer
+   ```
 
+3. **Build the Project:**
+
+   If using Maven (as indicated by the `pom.xml` file), run:
+
+   ```sh
+   mvn clean install
+   ```
+
+4. **Run the Application:**
+
+   If you are using the command line:
+
+   ```sh
+   java -cp target/your-artifact.jar main.ui.CodeAnalyzerUI
+   ```
+
+   Alternatively, you can run the application from within your IDE (e.g., Visual Studio Code).
 
 ## Usage
 
-1. **Input Code**:
-   - Enter your Java code in the left panel
-   - Choose input type (Manual/Random/Hardcoded)
-   - Set input parameters if required
+1. **Enter Code:**
+   - Use the left panel to type or paste your Java code.
+  
+2. **Select Input Type:**
+   - Choose from Single, Range, Manual, Random, or Hardcoded inputs.
 
-2. **Analysis**:
-   - Click "Analyze" to start the performance analysis
-   - Wait for the results to appear in the right panel
+3. **Start Analysis:**
+   - Click "Analyze" to run the performance metrics.
+  
+4. **View Graphs and Results:**
+   - Use "Show Time Graph" and "Show Memory Graph" buttons to view detailed visualizations.
+   - Review the numeric results displayed alongside the graphs.
 
-3. **View Results**:
-   - Execution time with adjustable units
-   - Memory usage with adjustable units
-   - Time complexity analysis
-   - Space complexity analysis
-   - Performance graphs
-   - Input/Output data visualization
-
-## Features in Detail
-
-### Code Analysis
-- Automated detection of algorithm types
-- Complex pattern recognition for various data structures
-- Multiple runs for accurate performance measurement
-- Warm-up cycles for [JVM optimization](https://en.wikipedia.org/wiki/Just-in-time_compilation)
-
-### Complexity Analysis
-- Detection of common algorithm patterns like:
-  - Iterative algorithms
-  - Recursive algorithms
-  - Divide and conquer
-  - Dynamic programming
-  - Backtracking
-
-### Performance Metrics
-- Average execution time
-- Memory consumption
-- Time complexity notation
-- Space complexity notation
-
-## Contributing
-
-Contributions are welcome! Please feel free to submit a [Pull Request](https://docs.github.com/en/pull-requests/collaborating-with-pull-requests/proposing-changes-to-your-work-with-pull-requests/about-pull-requests).
-
-1. Fork the project
-2. Create your feature branch (`git checkout -b feature/AmazingFeature`)
-3. Commit your changes (`git commit -m 'Add some AmazingFeature'`)
-4. Push to the branch (`git push origin feature/AmazingFeature`)
-5. Open a Pull Request
-
-## License
-
-This project is licensed under the MIT License - see the [LICENSE](https://choosealicense.com/licenses/mit/) file for details.
-
-## Support
-
-For support, please open an issue in the GitHub repository or contact the maintainers.
-
-## Future Enhancements
-
-- Extended algorithm pattern recognition
-- Additional visualization options
-- Support for more complex input patterns
-- Integration with popular [IDEs](https://en.wikipedia.org/wiki/Integrated_development_environment)
-- Batch analysis capabilities
-
----
-
+5. **Use the User Manual:**
+   - Access the user manual directly from the UI for further guidance.
