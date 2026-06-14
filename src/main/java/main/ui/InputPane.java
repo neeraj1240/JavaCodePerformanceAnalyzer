@@ -59,6 +59,11 @@ public class InputPane extends VBox {
         rangeInputBtn.setToggleGroup(inputTypeGroup);
         singleInputBtn.setSelected(true);
 
+        singleInputBtn.setMaxWidth(Double.MAX_VALUE);
+        HBox.setHgrow(singleInputBtn, Priority.ALWAYS);
+        rangeInputBtn.setMaxWidth(Double.MAX_VALUE);
+        HBox.setHgrow(rangeInputBtn, Priority.ALWAYS);
+
         HBox inputTypeBox = new HBox(singleInputBtn, rangeInputBtn);
         inputTypeBox.getStyleClass().add("segment-box");
 
@@ -78,6 +83,13 @@ public class InputPane extends VBox {
         hardcodedInputBtn.setToggleGroup(singleInputGroup);
         randomInputBtn.setSelected(true);
 
+        manualInputBtn.setMaxWidth(Double.MAX_VALUE);
+        HBox.setHgrow(manualInputBtn, Priority.ALWAYS);
+        randomInputBtn.setMaxWidth(Double.MAX_VALUE);
+        HBox.setHgrow(randomInputBtn, Priority.ALWAYS);
+        hardcodedInputBtn.setMaxWidth(Double.MAX_VALUE);
+        HBox.setHgrow(hardcodedInputBtn, Priority.ALWAYS);
+
         HBox singleInputBox = new HBox(manualInputBtn, randomInputBtn, hardcodedInputBtn);
         singleInputBox.getStyleClass().add("segment-box");
 
@@ -89,7 +101,7 @@ public class InputPane extends VBox {
         arrayTypeComboBox.getItems().addAll("Random", "Sorted", "Nearly Sorted");
         arrayTypeComboBox.setValue("Random");
         arrayTypeComboBox.getStyleClass().add("combo-box-dark");
-        arrayTypeComboBox.setPrefWidth(Double.MAX_VALUE);
+        arrayTypeComboBox.setMaxWidth(Double.MAX_VALUE);
         
         VBox arrayTypeBox = new VBox(5, arrayTypeLabel, arrayTypeComboBox);
 
@@ -99,6 +111,7 @@ public class InputPane extends VBox {
         
         inputSizeField = new TextField();
         inputSizeField.getStyleClass().add("text-field-dark");
+        inputSizeField.setMaxWidth(Double.MAX_VALUE);
         inputSizeBox = new VBox(5, sizeLabel, inputSizeField);
 
         // Range Input
