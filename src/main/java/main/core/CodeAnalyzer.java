@@ -89,22 +89,10 @@ public class CodeAnalyzer {
                     for (int size : sizes) {
                         String generatedInput = inputGenerator.generateInputForType(inputType, size);
                         inputGenerator.setGeneratedInput(generatedInput);
-                        // Warm-up runs
-                        for (int i = 0; i < WARMUP_RUNS; i++) {
-                            codeExecutor.executeAndMeasure(tempDir, className, generatedInput);
-                        }
-                        double totalTime = 0;
-                        double totalMemory = 0;
                         System.gc();
                         Thread.sleep(100);
-                        for (int i = 0; i < MEASUREMENT_RUNS; i++) {
-                            CodeExecutor.PerformanceMetrics metrics = codeExecutor.executeAndMeasure(tempDir, className, generatedInput);
-                            totalTime += metrics.executionTime;
-                            totalMemory += metrics.memoryUsed;
-                        }
-                        double avgTime = totalTime / MEASUREMENT_RUNS;
-                        double avgMemory = totalMemory / MEASUREMENT_RUNS;
-                        measurements.add(new double[]{size, avgTime, avgMemory});
+                        CodeExecutor.PerformanceMetrics metrics = codeExecutor.executeAndMeasure(tempDir, className, generatedInput);
+                        measurements.add(new double[]{size, metrics.executionTime, metrics.memoryUsed});
                     }
 
                     double[] sizesArr = new double[measurements.size()];
@@ -141,22 +129,10 @@ public class CodeAnalyzer {
                     }
                 }
 
-                for (int i = 0; i < WARMUP_RUNS; i++) {
-                    codeExecutor.executeAndMeasure(tempDir, className, input);
-                }
-                double totalTime = 0;
-                double totalMemory = 0;
-                CodeExecutor.PerformanceMetrics lastMetrics = null;
                 System.gc();
                 Thread.sleep(100);
-                for (int i = 0; i < MEASUREMENT_RUNS; i++) {
-                    lastMetrics = codeExecutor.executeAndMeasure(tempDir, className, input);
-                    totalTime += lastMetrics.executionTime;
-                    totalMemory += lastMetrics.memoryUsed;
-                }
-                double avgTime = totalTime / MEASUREMENT_RUNS;
-                double avgMemory = totalMemory / MEASUREMENT_RUNS;
-                return new AnalysisResult(avgTime, avgMemory, inputSize);
+                CodeExecutor.PerformanceMetrics metrics = codeExecutor.executeAndMeasure(tempDir, className, input);
+                return new AnalysisResult(metrics.executionTime, metrics.memoryUsed, inputSize);
             }
         } finally {
             codeCompiler.deleteDirectory(tempDir);

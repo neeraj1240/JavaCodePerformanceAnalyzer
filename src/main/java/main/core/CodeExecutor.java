@@ -1,7 +1,21 @@
 package main.core;
 
 import java.io.*;
+import java.net.URL;
+import java.net.URLClassLoader;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.util.Collection;
 import java.util.concurrent.TimeUnit;
+import java.lang.reflect.Method;
+
+import org.openjdk.jmh.annotations.*;
+import org.openjdk.jmh.runner.Runner;
+import org.openjdk.jmh.runner.options.Options;
+import org.openjdk.jmh.runner.options.OptionsBuilder;
+import org.openjdk.jmh.results.RunResult;
+import org.openjdk.jmh.profile.GCProfiler;
 
 public class CodeExecutor {
 
@@ -21,7 +35,67 @@ public class CodeExecutor {
         return executionOutput;
     }
 
+    @State(Scope.Benchmark)
+    @BenchmarkMode(Mode.AverageTime)
+    @OutputTimeUnit(TimeUnit.MILLISECONDS)
+    public static class UserCodeBenchmark {
+
+        @Param({""})
+        public String classDir;
+
+        @Param({""})
+        public String className;
+
+        @Param({""})
+        public String inputFilePath;
+
+        private Method mainMethod;
+        private byte[] inputBytes;
+        private InputStream originalIn;
+        private PrintStream originalOut;
+        private PrintStream originalErr;
+
+        @Setup(Level.Trial)
+        public void setupTrial() throws Exception {
+            URL url = new File(classDir).toURI().toURL();
+            URLClassLoader classLoader = new URLClassLoader(new URL[]{url}, ClassLoader.getSystemClassLoader());
+            Class<?> clazz = classLoader.loadClass(className);
+            mainMethod = clazz.getMethod("main", String[].class);
+            
+            if (inputFilePath != null && !inputFilePath.isEmpty()) {
+                inputBytes = Files.readAllBytes(Paths.get(inputFilePath));
+            } else {
+                inputBytes = new byte[0];
+            }
+        }
+
+        @Setup(Level.Invocation)
+        public void setupInvocation() {
+            originalIn = System.in;
+            originalOut = System.out;
+            originalErr = System.err;
+            
+            System.setIn(new ByteArrayInputStream(inputBytes));
+            // Suppress output during benchmarking
+            System.setOut(new PrintStream(new OutputStream() { public void write(int b) {} }));
+            System.setErr(new PrintStream(new OutputStream() { public void write(int b) {} }));
+        }
+
+        @TearDown(Level.Invocation)
+        public void tearDownInvocation() {
+            System.setIn(originalIn);
+            System.setOut(originalOut);
+            System.setErr(originalErr);
+        }
+
+        @Benchmark
+        public void executeCode() throws Exception {
+            mainMethod.invoke(null, (Object) new String[]{});
+        }
+    }
+
     public PerformanceMetrics executeAndMeasure(File directory, String className, String input) throws Exception {
+        // Step 1: Run the process once to capture execution output and verify it succeeds
         ProcessBuilder runBuilder = new ProcessBuilder(
                 "java",
                 "-XX:+UseSerialGC",
@@ -32,19 +106,6 @@ public class CodeExecutor {
                 className
         );
         runBuilder.redirectErrorStream(true);
-
-        for (int i = 0; i < 3; i++) {
-            System.gc();
-            Thread.sleep(50);
-        }
-
-        Runtime runtime = Runtime.getRuntime();
-        runtime.gc();
-        Thread.sleep(100);
-
-        long startMemory = Math.max(0, runtime.totalMemory() - runtime.freeMemory());
-        long startTime = System.nanoTime();
-
         Process runProcess = runBuilder.start();
         StringBuilder output = new StringBuilder();
 
@@ -77,7 +138,6 @@ public class CodeExecutor {
 
         inputThread.start();
         outputThread.start();
-
         inputThread.join();
         outputThread.join();
 
@@ -93,15 +153,45 @@ public class CodeExecutor {
 
         this.executionOutput = output.toString();
 
-        long endTime = System.nanoTime();
-        runtime.gc();
-        Thread.sleep(100);
-        long endMemory = Math.max(0, runtime.totalMemory() - runtime.freeMemory());
-        long memoryUsed = Math.max(0, endMemory - startMemory);
+        // Step 2: Write input to a temp file for the JMH benchmark
+        Path tempInputFile = Files.createTempFile("jmh_input_", ".txt");
+        try {
+            Files.write(tempInputFile, input.getBytes());
 
-        return new PerformanceMetrics(
-                (endTime - startTime) / 1_000_000.0,
-                memoryUsed
-        );
+            // Step 3: Configure and run JMH
+            Options opt = new OptionsBuilder()
+                    .include(".*" + UserCodeBenchmark.class.getSimpleName() + ".*")
+                    .param("classDir", directory.getAbsolutePath())
+                    .param("className", className)
+                    .param("inputFilePath", tempInputFile.toAbsolutePath().toString())
+                    .forks(1)
+                    .warmupIterations(2)
+                    .warmupTime(org.openjdk.jmh.runner.options.TimeValue.seconds(1))
+                    .measurementIterations(3)
+                    .measurementTime(org.openjdk.jmh.runner.options.TimeValue.seconds(1))
+                    .addProfiler(GCProfiler.class)
+                    .build();
+
+            Collection<RunResult> results = new Runner(opt).run();
+            if (results == null || results.isEmpty()) {
+                throw new Exception("JMH benchmarking failed to produce results.");
+            }
+
+            RunResult result = results.iterator().next();
+            
+            // Average time per operation in milliseconds (as configured by @OutputTimeUnit)
+            double timeMs = result.getPrimaryResult().getScore();
+            
+            // Extract memory allocated (bytes per operation)
+            double memoryUsedBytes = 0;
+            if (result.getSecondaryResults().containsKey("gc.alloc.rate.norm")) {
+                memoryUsedBytes = result.getSecondaryResults().get("gc.alloc.rate.norm").getScore();
+            }
+
+            return new PerformanceMetrics(timeMs, memoryUsedBytes);
+
+        } finally {
+            Files.deleteIfExists(tempInputFile);
+        }
     }
 }
