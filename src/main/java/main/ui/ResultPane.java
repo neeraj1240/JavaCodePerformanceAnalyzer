@@ -2,6 +2,7 @@ package main.ui;
 
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
+import javafx.scene.Node;
 import javafx.scene.control.*;
 import javafx.scene.layout.*;
 import main.core.AnalysisResult;
@@ -15,8 +16,6 @@ public class ResultPane extends VBox {
     private double lastExecutionTime = 0.0;
     private double lastMemoryUsed = 0.0;
 
-    private Runnable onShowTimeGraph;
-    private Runnable onShowMemoryGraph;
     private Runnable onShowInputData;
     private Runnable onShowOutputData;
 
@@ -77,24 +76,28 @@ public class ResultPane extends VBox {
         memoryUnitComboBox.setOnAction(e -> updateMemoryDisplay());
     }
 
-    public void setOnShowTimeGraph(Runnable onShowTimeGraph) { this.onShowTimeGraph = onShowTimeGraph; }
-    public void setOnShowMemoryGraph(Runnable onShowMemoryGraph) { this.onShowMemoryGraph = onShowMemoryGraph; }
     public void setOnShowInputData(Runnable onShowInputData) { this.onShowInputData = onShowInputData; }
     public void setOnShowOutputData(Runnable onShowOutputData) { this.onShowOutputData = onShowOutputData; }
 
     public void displayResults(AnalysisResult result) {
         lastExecutionTime = result.getExecutionTime();
         lastMemoryUsed = result.getMemoryUsed();
-        updateDisplays(true);
+        updateDisplays();
     }
 
     public void displayDefaultResults() {
         lastExecutionTime = 0.0;
         lastMemoryUsed = 0.0;
-        updateDisplays(false);
+        updateDisplays();
     }
 
-    private void updateDisplays(boolean hasGraphAction) {
+    private void updateDisplays() {
+        // Keep the graphs if they exist
+        Node graphsBox = null;
+        if (resultArea.getChildren().size() > 2) {
+            graphsBox = resultArea.getChildren().get(2);
+        }
+
         resultArea.getChildren().clear();
 
         // Time Box
@@ -127,13 +130,7 @@ public class ResultPane extends VBox {
         timeUnitLabel.getStyleClass().add("result-unit-label");
         timeUnitBox.getChildren().addAll(timeUnitLabel, timeUnitComboBox);
         
-        Button timeGraphBtn = new Button("📈 View Time Graph");
-        timeGraphBtn.getStyleClass().add("graph-button");
-        if (hasGraphAction) {
-            timeGraphBtn.setOnAction(e -> { if (onShowTimeGraph != null) onShowTimeGraph.run(); });
-        }
-        
-        timeRight.getChildren().addAll(timeUnitBox, timeGraphBtn);
+        timeRight.getChildren().addAll(timeUnitBox);
         
         timeBox.setLeft(timeLeft);
         timeBox.setRight(timeRight);
@@ -168,18 +165,32 @@ public class ResultPane extends VBox {
         memoryUnitLabel.getStyleClass().add("result-unit-label");
         memoryUnitBox.getChildren().addAll(memoryUnitLabel, memoryUnitComboBox);
         
-        Button memoryGraphBtn = new Button("📈 View Memory Graph");
-        memoryGraphBtn.getStyleClass().add("graph-button");
-        if (hasGraphAction) {
-            memoryGraphBtn.setOnAction(e -> { if (onShowMemoryGraph != null) onShowMemoryGraph.run(); });
-        }
-        
-        memoryRight.getChildren().addAll(memoryUnitBox, memoryGraphBtn);
+        memoryRight.getChildren().addAll(memoryUnitBox);
         
         memoryBox.setLeft(memoryLeft);
         memoryBox.setRight(memoryRight);
 
         resultArea.getChildren().addAll(timeBox, memoryBox);
+        
+        if (graphsBox != null) {
+            resultArea.getChildren().add(graphsBox);
+        }
+    }
+
+    public void displayGraphs(Node timeGraph, Node memoryGraph) {
+        HBox graphsBox = new HBox(20);
+        graphsBox.setAlignment(Pos.CENTER);
+        
+        HBox.setHgrow(timeGraph, Priority.ALWAYS);
+        HBox.setHgrow(memoryGraph, Priority.ALWAYS);
+        
+        graphsBox.getChildren().addAll(timeGraph, memoryGraph);
+        
+        if (resultArea.getChildren().size() == 2) {
+            resultArea.getChildren().add(graphsBox);
+        } else if (resultArea.getChildren().size() == 3) {
+            resultArea.getChildren().set(2, graphsBox);
+        }
     }
 
     private void updateTimeDisplay() {

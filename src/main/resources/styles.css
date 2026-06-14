@@ -256,7 +256,7 @@
     -fx-border-color: #30363d;
     -fx-border-radius: 12px;
     -fx-background-radius: 12px;
-    -fx-padding: 20px;
+    -fx-padding: 15px;
 }
 
 .result-header {
@@ -265,15 +265,15 @@
     -fx-text-fill: #c9d1d9;
 }
 .result-value {
-    -fx-font-size: 36px;
+    -fx-font-size: 28px;
     -fx-font-weight: bold;
     -fx-text-fill: #ffffff;
 }
 .result-unit {
-    -fx-font-size: 20px;
+    -fx-font-size: 16px;
     -fx-font-weight: bold;
     -fx-text-fill: #ffffff;
-    -fx-padding: 0 0 5 0;
+    -fx-padding: 0 0 4 0;
 }
 .result-sub {
     -fx-font-size: 13px;
@@ -353,4 +353,83 @@
 .chart-legend {
     -fx-background-color: transparent;
     -fx-text-fill: #c9d1d9;
+}
+
+/* Embedded Area Charts */
+.embedded-graph-container {
+    -fx-background-color: #161b22;
+    -fx-border-color: #30363d;
+    -fx-border-width: 1px;
+    -fx-border-radius: 8px;
+    -fx-background-radius: 8px;
+    -fx-padding: 0;
+}
+
+.expand-graph-btn {
+    -fx-background-color: transparent;
+    -fx-text-fill: #8b949e;
+    -fx-font-size: 16px;
+    -fx-padding: 5px;
+    -fx-cursor: hand;
+}
+.expand-graph-btn:hover {
+    -fx-text-fill: #c9d1d9;
+    -fx-background-color: #21262d;
+    -fx-background-radius: 4px;
+}
+
+.embedded-time-chart, .embedded-memory-chart {
+    -fx-padding: 10px;
+    -fx-min-height: 250px;
+    -fx-pref-height: 250px;
+}
+.embedded-time-chart .chart-title, .embedded-memory-chart .chart-title {
+    -fx-text-fill: #c9d1d9;
+    -fx-font-size: 12px;
+    -fx-font-weight: bold;
+    -fx-padding: 0;
+}
+.embedded-time-chart .axis-label, .embedded-memory-chart .axis-label {
+    -fx-text-fill: #8b949e;
+    -fx-font-size: 11px;
+}
+.embedded-time-chart .axis:left, .embedded-time-chart .axis:bottom,
+.embedded-memory-chart .axis:left, .embedded-memory-chart .axis:bottom {
+    -fx-tick-label-fill: #8b949e;
+}
+.embedded-time-chart .chart-plot-background, .embedded-memory-chart .chart-plot-background {
+    -fx-background-color: transparent;
+}
+.embedded-time-chart .chart-vertical-grid-lines, .embedded-time-chart .chart-horizontal-grid-lines,
+.embedded-memory-chart .chart-vertical-grid-lines, .embedded-memory-chart .chart-horizontal-grid-lines {
+    -fx-stroke: #21262d;
+    -fx-stroke-dash-array: 2 4;
+}
+
+/* Time Chart Colors */
+.embedded-time-chart .default-color0.chart-series-line {
+    -fx-stroke: #1f6feb;
+    -fx-stroke-width: 2px;
+}
+.embedded-time-chart .default-color0.chart-series-area-fill {
+    -fx-fill: linear-gradient(to bottom, rgba(31, 111, 235, 0.4) 0%, rgba(31, 111, 235, 0.0) 100%);
+}
+.embedded-time-chart .default-color0.chart-line-symbol {
+    -fx-background-color: #1f6feb, #161b22;
+    -fx-background-insets: 0, 1;
+    -fx-padding: 3px;
+}
+
+/* Memory Chart Colors */
+.embedded-memory-chart .default-color0.chart-series-line {
+    -fx-stroke: #a371f7;
+    -fx-stroke-width: 2px;
+}
+.embedded-memory-chart .default-color0.chart-series-area-fill {
+    -fx-fill: linear-gradient(to bottom, rgba(163, 113, 247, 0.4) 0%, rgba(163, 113, 247, 0.0) 100%);
+}
+.embedded-memory-chart .default-color0.chart-line-symbol {
+    -fx-background-color: #a371f7, #161b22;
+    -fx-background-insets: 0, 1;
+    -fx-padding: 3px;
 }

@@ -41,8 +41,6 @@ public class AnalysisController {
         inputPane.setOnAnalyze(this::handleAnalyze);
         inputPane.setOnClear(this::handleClear);
 
-        resultPane.setOnShowTimeGraph(this::showTimeGraph);
-        resultPane.setOnShowMemoryGraph(this::showMemoryGraph);
         resultPane.setOnShowInputData(this::showInputData);
         resultPane.setOnShowOutputData(this::showOutputData);
     }
@@ -60,21 +58,7 @@ public class AnalysisController {
         currentOutput = "";
     }
 
-    private void showTimeGraph() {
-        try {
-            graphManager.showTimeGraph();
-        } catch (IllegalStateException e) {
-            UIUtils.showAlert("Error", e.getMessage());
-        }
-    }
-
-    private void showMemoryGraph() {
-        try {
-            graphManager.showMemoryGraph();
-        } catch (IllegalStateException e) {
-            UIUtils.showAlert("Error", e.getMessage());
-        }
-    }
+    // Removed showTimeGraph and showMemoryGraph
 
     private void showInputData() {
         inputDataWindow.showData(currentInput);
@@ -171,6 +155,7 @@ public class AnalysisController {
                 memoryUsages.add(result.getMemoryUsed());
                 inputSizes.add(finalInputSize);
                 resultPane.displayResults(result);
+                resultPane.displayGraphs(graphManager.createEmbeddedTimeGraph(), graphManager.createEmbeddedMemoryGraph());
             });
 
             analysisTask.setOnFailed(e -> {
@@ -250,6 +235,7 @@ public class AnalysisController {
                     AnalysisResult lastResult = results.get(results.size() - 1);
                     currentOutput = analyzer.getExecutionOutput();
                     resultPane.displayResults(lastResult);
+                    resultPane.displayGraphs(graphManager.createEmbeddedTimeGraph(), graphManager.createEmbeddedMemoryGraph());
                 }
             });
 

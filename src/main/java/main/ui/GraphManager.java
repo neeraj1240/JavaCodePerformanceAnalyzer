@@ -4,7 +4,8 @@ import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Node;
 import javafx.scene.Scene;
-import javafx.scene.chart.LineChart;
+import javafx.scene.chart.AreaChart;
+import javafx.scene.chart.AreaChart;
 import javafx.scene.chart.NumberAxis;
 import javafx.scene.chart.XYChart;
 import javafx.scene.control.*;
@@ -43,7 +44,7 @@ public class GraphManager {
     private static final Map<String, ThemeColors> THEMES = new HashMap<>();
     static {
         THEMES.put("light", new ThemeColors("#ffffff", "#2196f3", "#757575"));
-        THEMES.put("dark", new ThemeColors("#2b2b2b", "#64b5f6", "#bbbbbb"));
+        THEMES.put("dark", new ThemeColors("#0b0f19", "#1f6feb", "#c9d1d9"));
         THEMES.put("contrast", new ThemeColors("#000000", "#00ff00", "#ffffff"));
     }
 
@@ -81,13 +82,17 @@ public class GraphManager {
         NumberAxis yAxis = new NumberAxis("Execution Time (ms)", 0,
                 getMaxValue(executionTimes), calculateTickUnit(getMaxValue(executionTimes)));
 
-        LineChart<Number, Number> lineChart = createLineChart(xAxis, yAxis, "Execution Time vs Input Size");
+        AreaChart<Number, Number> chart = createAreaChart(xAxis, yAxis, "Execution Time vs Input Size");
+        chart.getStyleClass().add("embedded-time-chart");
+        if (getClass().getResource("/styles.css") != null) {
+            chart.getStylesheets().add(getClass().getResource("/styles.css").toExternalForm());
+        }
         XYChart.Series<Number, Number> series = new XYChart.Series<>();
         series.setName("Execution Time");
 
         addProgressiveDataPoints(series, executionTimes);
 
-        showGraph(lineChart, series, "Execution Time Graph");
+        showGraph(chart, series, "Execution Time Graph");
     }
 
     public void showMemoryGraph() {
@@ -100,13 +105,99 @@ public class GraphManager {
         NumberAxis yAxis = new NumberAxis("Memory Usage (bytes)", 0,
                 getMaxValue(memoryUsages), calculateTickUnit(getMaxValue(memoryUsages)));
 
-        LineChart<Number, Number> lineChart = createLineChart(xAxis, yAxis, "Memory Usage vs Input Size");
+        AreaChart<Number, Number> chart = createAreaChart(xAxis, yAxis, "Memory Usage vs Input Size");
+        chart.getStyleClass().add("embedded-memory-chart");
+        if (getClass().getResource("/styles.css") != null) {
+            chart.getStylesheets().add(getClass().getResource("/styles.css").toExternalForm());
+        }
         XYChart.Series<Number, Number> series = new XYChart.Series<>();
         series.setName("Memory Usage");
 
         addProgressiveDataPoints(series, memoryUsages);
 
-        showGraph(lineChart, series, "Memory Usage Graph");
+        showGraph(chart, series, "Memory Usage Graph");
+    }
+
+    public Node createEmbeddedTimeGraph() {
+        if (executionTimes.isEmpty()) {
+            Label noData = new Label("No data available");
+            noData.getStyleClass().add("result-sub");
+            return noData;
+        }
+
+        NumberAxis xAxis = new NumberAxis();
+        xAxis.setLabel("Execution");
+        NumberAxis yAxis = new NumberAxis();
+        yAxis.setLabel("Time (ms)");
+
+        AreaChart<Number, Number> chart = new AreaChart<>(xAxis, yAxis);
+        chart.setTitle("TIME GRAPH");
+        chart.setCreateSymbols(true);
+        chart.setAnimated(false);
+        chart.setLegendVisible(false);
+        
+        chart.getStyleClass().add("embedded-time-chart");
+        if (getClass().getResource("/styles.css") != null) {
+            chart.getStylesheets().add(getClass().getResource("/styles.css").toExternalForm());
+        }
+
+        XYChart.Series<Number, Number> series = new XYChart.Series<>();
+        addEmbeddedDataPoints(series, executionTimes);
+        chart.getData().add(series);
+
+        return wrapEmbeddedGraph(chart, this::showTimeGraph);
+    }
+
+    public Node createEmbeddedMemoryGraph() {
+        if (memoryUsages.isEmpty()) {
+            Label noData = new Label("No data available");
+            noData.getStyleClass().add("result-sub");
+            return noData;
+        }
+
+        NumberAxis xAxis = new NumberAxis();
+        xAxis.setLabel("Execution");
+        NumberAxis yAxis = new NumberAxis();
+        yAxis.setLabel("Memory (MB)");
+
+        AreaChart<Number, Number> chart = new AreaChart<>(xAxis, yAxis);
+        chart.setTitle("MEMORY GRAPH");
+        chart.setCreateSymbols(true);
+        chart.setAnimated(false);
+        chart.setLegendVisible(false);
+        
+        chart.getStyleClass().add("embedded-memory-chart");
+        if (getClass().getResource("/styles.css") != null) {
+            chart.getStylesheets().add(getClass().getResource("/styles.css").toExternalForm());
+        }
+
+        XYChart.Series<Number, Number> series = new XYChart.Series<>();
+        addEmbeddedDataPoints(series, memoryUsages);
+        chart.getData().add(series);
+
+        return wrapEmbeddedGraph(chart, this::showMemoryGraph);
+    }
+
+    private void addEmbeddedDataPoints(XYChart.Series<Number, Number> series, List<Double> values) {
+        for (int i = 0; i < values.size(); i++) {
+            series.getData().add(new XYChart.Data<>(i + 1, values.get(i)));
+        }
+    }
+
+    private Node wrapEmbeddedGraph(Node chart, Runnable onExpand) {
+        StackPane pane = new StackPane();
+        pane.getStyleClass().add("embedded-graph-container");
+        pane.getChildren().add(chart);
+        
+        Button expandBtn = new Button("↗");
+        expandBtn.getStyleClass().add("expand-graph-btn");
+        expandBtn.setOnAction(e -> onExpand.run());
+        
+        StackPane.setAlignment(expandBtn, Pos.TOP_RIGHT);
+        StackPane.setMargin(expandBtn, new Insets(10));
+        
+        pane.getChildren().add(expandBtn);
+        return pane;
     }
 
     private void addProgressiveDataPoints(XYChart.Series<Number, Number> series, List<Double> values) {
@@ -162,61 +253,34 @@ public class GraphManager {
         }
     }
 
-    private LineChart<Number, Number> createLineChart(NumberAxis xAxis, NumberAxis yAxis, String title) {
-        LineChart<Number, Number> lineChart = new LineChart<>(xAxis, yAxis);
-        lineChart.setTitle(title);
-        lineChart.setCreateSymbols(true);
-        lineChart.setAnimated(false);
+    private AreaChart<Number, Number> createAreaChart(NumberAxis xAxis, NumberAxis yAxis, String title) {
+        AreaChart<Number, Number> chart = new AreaChart<>(xAxis, yAxis);
+        chart.setTitle(title);
+        chart.setCreateSymbols(true);
+        chart.setAnimated(false);
 
-        String cssStyle =
-                ".chart-series-line {" +
-                        "    -fx-stroke-width: 2px;" +
-                        "    -fx-stroke: " + CHART_LINE_COLOR + ";" +
-                        "}" +
-                        ".chart-line-symbol {" +
-                        "    -fx-background-color: " + CHART_LINE_COLOR + ", white;" +
-                        "    -fx-background-insets: 0, 2;" +
-                        "    -fx-background-radius: 5px;" +
-                        "    -fx-padding: 5px;" +
-                        "}";
-
-        lineChart.getStylesheets().add("data:text/css," + cssStyle.replace(" ", "%20"));
-        lineChart.setStyle(
-                "-fx-background-color: " + CHART_BACKGROUND + ";" +
-                        "-fx-padding: 10px;" +
-                        "-fx-text-fill: " + AXIS_COLOR + ";"
-        );
-
-        lineChart.lookup(".chart-plot-background").setStyle(
-                "-fx-background-color: white;"
-        );
-
-        lineChart.setTitleSide(javafx.geometry.Side.TOP);
-        lineChart.setStyle(lineChart.getStyle() +
-                "-fx-font-size: 16px;" +
-                "-fx-font-weight: bold;"
-        );
-
-        return lineChart;
+        // Allow CSS to style it
+        chart.setTitleSide(javafx.geometry.Side.TOP);
+        return chart;
     }
 
-    private void showGraph(LineChart<Number, Number> lineChart, XYChart.Series<Number, Number> series, String title) {
-        lineChart.getData().clear();
-        lineChart.getData().add(series);
+    private void showGraph(AreaChart<Number, Number> AreaChart, XYChart.Series<Number, Number> series, String title) {
+        AreaChart.getData().clear();
+        AreaChart.getData().add(series);
 
         // Add interactive features
-        addDataPointInteraction(lineChart);
-        VBox controlPanel = createControlPanel(lineChart);
+        addDataPointInteraction(AreaChart);
+        VBox controlPanel = createControlPanel(AreaChart);
 
         // Add zoom functionality
-        addZoomCapability(lineChart);
+        addZoomCapability(AreaChart);
 
-        Stage graphStage = setupGraphStage(lineChart, controlPanel, title);
+        Stage graphStage = setupGraphStage(AreaChart, controlPanel, title);
         graphStage.show();
         graphStage.toFront();
     }
 
-    private void addDataPointInteraction(LineChart<Number, Number> chart) {
+    private void addDataPointInteraction(AreaChart<Number, Number> chart) {
         for (XYChart.Series<Number, Number> series : chart.getData()) {
             for (XYChart.Data<Number, Number> data : series.getData()) {
                 Node node = data.getNode();
@@ -258,7 +322,7 @@ public class GraphManager {
         }
     }
 
-    private void addZoomCapability(LineChart<Number, Number> chart) {
+    private void addZoomCapability(AreaChart<Number, Number> chart) {
         chart.setOnScroll(event -> {
             event.consume();
             if (event.isControlDown()) {
@@ -315,7 +379,7 @@ public class GraphManager {
         });
     }
 
-    private VBox createControlPanel(LineChart<Number, Number> chart) {
+    private VBox createControlPanel(AreaChart<Number, Number> chart) {
         VBox controlPanel = new VBox(10);
         controlPanel.setPadding(new Insets(10));
         controlPanel.setStyle("-fx-background-color: #f0f0f0; -fx-padding: 10;");
@@ -323,7 +387,7 @@ public class GraphManager {
         // Theme selector
         ComboBox<String> themeSelector = new ComboBox<>();
         themeSelector.getItems().addAll("Light", "Dark", "Contrast");
-        themeSelector.setValue("Light");
+        themeSelector.setValue("Dark");
         themeSelector.setOnAction(e -> applyTheme(chart, themeSelector.getValue().toLowerCase()));
 
         // Toggle data points
@@ -356,14 +420,14 @@ public class GraphManager {
         return controlPanel;
     }
 
-    private Stage setupGraphStage(LineChart<Number, Number> lineChart, VBox controlPanel, String title) {
+    private Stage setupGraphStage(AreaChart<Number, Number> AreaChart, VBox controlPanel, String title) {
         Stage graphStage = new Stage();
         graphStage.setTitle(title);
 
         HBox root = new HBox(10);
         root.setPadding(new Insets(10));
-        root.getChildren().addAll(lineChart, controlPanel);
-        HBox.setHgrow(lineChart, Priority.ALWAYS);
+        root.getChildren().addAll(AreaChart, controlPanel);
+        HBox.setHgrow(AreaChart, Priority.ALWAYS);
 
         Scene scene = new Scene(root);
         graphStage.setScene(scene);
@@ -389,33 +453,26 @@ public class GraphManager {
         detailsStage.show();
     }
 
-    private void applyTheme(LineChart<Number, Number> chart, String themeName) {
+    private void applyTheme(AreaChart<Number, Number> chart, String themeName) {
         ThemeColors colors = THEMES.get(themeName);
         if (colors != null) {
             chart.setStyle(String.format(
                     "-fx-background-color: %s; -fx-text-fill: %s;",
                     colors.background, colors.textColor
             ));
-
-            for (XYChart.Series<Number, Number> series : chart.getData()) {
-                series.getNode().setStyle(String.format(
-                        "-fx-stroke: %s; -fx-stroke-width: 2px;",
-                        colors.lineColor
-                ));
-            }
         }
     }
 
-    private void toggleDataPoints(LineChart<Number, Number> chart, boolean show) {
+    private void toggleDataPoints(AreaChart<Number, Number> chart, boolean show) {
         chart.setCreateSymbols(show);
     }
 
-    private void toggleGridLines(LineChart<Number, Number> chart, boolean show) {
+    private void toggleGridLines(AreaChart<Number, Number> chart, boolean show) {
         chart.setHorizontalGridLinesVisible(show);
         chart.setVerticalGridLinesVisible(show);
     }
 
-    private void resetZoom(LineChart<Number, Number> chart) {
+    private void resetZoom(AreaChart<Number, Number> chart) {
         NumberAxis xAxis = (NumberAxis) chart.getXAxis();
         NumberAxis yAxis = (NumberAxis) chart.getYAxis();
 
@@ -423,7 +480,7 @@ public class GraphManager {
         yAxis.setAutoRanging(true);
     }
 
-    private void exportChartData(LineChart<Number, Number> chart) {
+    private void exportChartData(AreaChart<Number, Number> chart) {
         FileChooser fileChooser = new FileChooser();
         fileChooser.setTitle("Export Data");
         fileChooser.getExtensionFilters().add(
