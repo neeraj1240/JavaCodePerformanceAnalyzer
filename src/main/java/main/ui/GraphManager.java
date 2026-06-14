@@ -39,11 +39,7 @@ public class GraphManager {
     private String currentTheme = "light";
     private final DecimalFormat decimalFormat = new DecimalFormat("#.##");
 
-<<<<<<< HEAD
     // Theme colors
-=======
-
->>>>>>> 505ff4f81230b9b1d1d4f34cdce3988b88098477
     private static final Map<String, ThemeColors> THEMES = new HashMap<>();
     static {
         THEMES.put("light", new ThemeColors("#ffffff", "#2196f3", "#757575"));
@@ -324,21 +320,13 @@ public class GraphManager {
         controlPanel.setPadding(new Insets(10));
         controlPanel.setStyle("-fx-background-color: #f0f0f0; -fx-padding: 10;");
 
-<<<<<<< HEAD
         // Theme selector
-=======
-
->>>>>>> 505ff4f81230b9b1d1d4f34cdce3988b88098477
         ComboBox<String> themeSelector = new ComboBox<>();
         themeSelector.getItems().addAll("Light", "Dark", "Contrast");
         themeSelector.setValue("Light");
         themeSelector.setOnAction(e -> applyTheme(chart, themeSelector.getValue().toLowerCase()));
 
-<<<<<<< HEAD
         // Toggle data points
-=======
-
->>>>>>> 505ff4f81230b9b1d1d4f34cdce3988b88098477
         CheckBox showDataPoints = new CheckBox("Show Data Points");
         showDataPoints.setSelected(true);
         showDataPoints.setOnAction(e -> toggleDataPoints(chart, showDataPoints.isSelected()));
@@ -348,19 +336,11 @@ public class GraphManager {
         showGrid.setSelected(true);
         showGrid.setOnAction(e -> toggleGridLines(chart, showGrid.isSelected()));
 
-<<<<<<< HEAD
         // Export button
         Button exportButton = new Button("Export Data");
         exportButton.setOnAction(e -> exportChartData(chart));
 
         // Reset zoom button
-=======
-
-        Button exportButton = new Button("Export Data");
-        exportButton.setOnAction(e -> exportChartData(chart));
-
-
->>>>>>> 505ff4f81230b9b1d1d4f34cdce3988b88098477
         Button resetZoomButton = new Button("Reset Zoom");
         resetZoomButton.setOnAction(e -> resetZoom(chart));
 

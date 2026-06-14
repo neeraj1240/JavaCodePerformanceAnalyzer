@@ -105,10 +105,6 @@ public class CodeAnalyzerUI extends Application {
         codeInputArea.setWrapText(true);
         codeInputArea.setPrefRowCount(20);
         codeInputArea.setStyle("-fx-control-inner-background: #333333; -fx-text-fill: #ffffff; -fx-font-family: 'Consolas', monospace;");
-<<<<<<< HEAD
-=======
-
-
         ToggleGroup inputTypeGroup = new ToggleGroup();
         singleInputRadio = new RadioButton("Single Input");
         rangeInputRadio = new RadioButton("Input Range");
@@ -121,8 +117,6 @@ public class CodeAnalyzerUI extends Application {
         HBox inputTypeBox = new HBox(10, singleInputRadio, rangeInputRadio);
         inputTypeBox.setAlignment(Pos.CENTER_LEFT);
         inputTypeBox.getStyleClass().add("input-section-box");
-
->>>>>>> 505ff4f81230b9b1d1d4f34cdce3988b88098477
 
         manualInputRadio = new RadioButton("Manual Input");
         randomInputRadio = new RadioButton("Random Input");
