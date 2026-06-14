@@ -7,12 +7,12 @@ import javafx.scene.layout.*;
 
 public class InputPane extends VBox {
     private TextArea codeInputArea;
-    private RadioButton singleInputRadio;
-    private RadioButton rangeInputRadio;
+    private ToggleButton singleInputBtn;
+    private ToggleButton rangeInputBtn;
     
-    private RadioButton manualInputRadio;
-    private RadioButton randomInputRadio;
-    private RadioButton hardcodedInputRadio;
+    private ToggleButton manualInputBtn;
+    private ToggleButton randomInputBtn;
+    private ToggleButton hardcodedInputBtn;
     
     private ComboBox<String> arrayTypeComboBox;
     
@@ -22,100 +22,104 @@ public class InputPane extends VBox {
     private TextField stepSizeField;
     
     private TextArea manualInputArea;
-    private Label manualInputLabel;
     
     private VBox rangeInputBox;
-    private HBox inputSizeBox;
+    private VBox inputSizeBox;
 
     private Runnable onAnalyze;
     private Runnable onClear;
 
     public InputPane() {
-        super(10);
+        super(20);
         getStyleClass().add("left-pane");
-        setPadding(new Insets(20));
+        setPadding(new Insets(25));
         setPrefWidth(600);
 
-        Label titleLabel = new Label("Code Input");
+        HBox titleBox = new HBox(10);
+        titleBox.setAlignment(Pos.CENTER_LEFT);
+        Label titleLabel = new Label("</> CODE INPUT");
         titleLabel.getStyleClass().add("title-label");
+        titleBox.getChildren().add(titleLabel);
 
         codeInputArea = new TextArea();
         codeInputArea.getStyleClass().add("code-input");
         codeInputArea.setWrapText(true);
-        codeInputArea.setPrefRowCount(20);
-        codeInputArea.setStyle("-fx-control-inner-background: #333333; -fx-text-fill: #ffffff; -fx-font-family: 'Consolas', monospace;");
+        codeInputArea.setPrefRowCount(15);
 
-        ToggleGroup inputTypeGroup = new ToggleGroup();
-        singleInputRadio = new RadioButton("Single Input");
-        rangeInputRadio = new RadioButton("Input Range");
-        singleInputRadio.getStyleClass().add("radio-button");
-        rangeInputRadio.getStyleClass().add("radio-button");
-        singleInputRadio.setToggleGroup(inputTypeGroup);
-        rangeInputRadio.setToggleGroup(inputTypeGroup);
-        singleInputRadio.setSelected(true);
-
-        HBox inputTypeBox = new HBox(10, singleInputRadio, rangeInputRadio);
-        inputTypeBox.setAlignment(Pos.CENTER_LEFT);
-        inputTypeBox.getStyleClass().add("input-section-box");
-
-        manualInputRadio = new RadioButton("Manual Input");
-        randomInputRadio = new RadioButton("Random Input");
-        hardcodedInputRadio = new RadioButton("Hardcoded Input");
-        manualInputRadio.getStyleClass().add("radio-button");
-        randomInputRadio.getStyleClass().add("radio-button");
-        hardcodedInputRadio.getStyleClass().add("radio-button");
+        // Input Mode
+        Label inputModeLabel = new Label("INPUT MODE");
+        inputModeLabel.getStyleClass().add("section-label-header");
         
+        ToggleGroup inputTypeGroup = new ToggleGroup();
+        singleInputBtn = new ToggleButton("Single Input");
+        rangeInputBtn = new ToggleButton("Input Range");
+        singleInputBtn.getStyleClass().add("segment-button");
+        rangeInputBtn.getStyleClass().add("segment-button");
+        singleInputBtn.setToggleGroup(inputTypeGroup);
+        rangeInputBtn.setToggleGroup(inputTypeGroup);
+        singleInputBtn.setSelected(true);
+
+        HBox inputTypeBox = new HBox(singleInputBtn, rangeInputBtn);
+        inputTypeBox.getStyleClass().add("segment-box");
+
+        // Data Source
+        Label dataSourceLabel = new Label("DATA SOURCE");
+        dataSourceLabel.getStyleClass().add("section-label-header");
+
         ToggleGroup singleInputGroup = new ToggleGroup();
-        manualInputRadio.setToggleGroup(singleInputGroup);
-        randomInputRadio.setToggleGroup(singleInputGroup);
-        hardcodedInputRadio.setToggleGroup(singleInputGroup);
-        randomInputRadio.setSelected(true);
+        manualInputBtn = new ToggleButton("📝 Manual Input");
+        randomInputBtn = new ToggleButton("🔀 Random Input");
+        hardcodedInputBtn = new ToggleButton("🛠 Hardcoded Input");
+        manualInputBtn.getStyleClass().add("segment-button");
+        randomInputBtn.getStyleClass().add("segment-button");
+        hardcodedInputBtn.getStyleClass().add("segment-button");
+        manualInputBtn.setToggleGroup(singleInputGroup);
+        randomInputBtn.setToggleGroup(singleInputGroup);
+        hardcodedInputBtn.setToggleGroup(singleInputGroup);
+        randomInputBtn.setSelected(true);
 
-        HBox singleInputBox = new HBox(10, manualInputRadio, randomInputRadio, hardcodedInputRadio);
-        singleInputBox.setAlignment(Pos.CENTER_LEFT);
-        singleInputBox.getStyleClass().add("input-section-box");
+        HBox singleInputBox = new HBox(manualInputBtn, randomInputBtn, hardcodedInputBtn);
+        singleInputBox.getStyleClass().add("segment-box");
 
-        HBox arrayTypeBox = new HBox(10);
-        arrayTypeBox.setAlignment(Pos.CENTER_LEFT);
-        Label arrayTypeLabel = new Label("Array Type:");
-        arrayTypeLabel.setStyle("-fx-text-fill: #f0f0f0;");
+        // Array Type
+        Label arrayTypeLabel = new Label("ARRAY TYPE");
+        arrayTypeLabel.getStyleClass().add("section-label-header");
+        
         arrayTypeComboBox = new ComboBox<>();
         arrayTypeComboBox.getItems().addAll("Random", "Sorted", "Nearly Sorted");
         arrayTypeComboBox.setValue("Random");
-        arrayTypeComboBox.setStyle("-fx-text-fill: black; -fx-background-color: white;");
-        arrayTypeBox.getChildren().addAll(arrayTypeLabel, arrayTypeComboBox);
+        arrayTypeComboBox.getStyleClass().add("combo-box-dark");
+        arrayTypeComboBox.setPrefWidth(Double.MAX_VALUE);
+        
+        VBox arrayTypeBox = new VBox(5, arrayTypeLabel, arrayTypeComboBox);
 
-        inputSizeBox = new HBox(10);
-        inputSizeBox.setAlignment(Pos.CENTER_LEFT);
-        Label sizeLabel = new Label("Input Size:");
-        sizeLabel.setStyle("-fx-text-fill: #f0f0f0;");
+        // Input Size
+        Label sizeLabel = new Label("INPUT SIZE");
+        sizeLabel.getStyleClass().add("section-label-header");
+        
         inputSizeField = new TextField();
-        inputSizeField.setPrefWidth(100);
-        inputSizeField.setStyle("-fx-text-fill: black; -fx-background-color: white;");
-        inputSizeBox.getChildren().addAll(sizeLabel, inputSizeField);
+        inputSizeField.getStyleClass().add("text-field-dark");
+        inputSizeBox = new VBox(5, sizeLabel, inputSizeField);
 
+        // Range Input
         Label minSizeLabel = new Label("Min Size:");
         minSizeLabel.getStyleClass().add("text-field-label");
         minSizeField = new TextField();
-        minSizeField.setPrefWidth(100);
-        minSizeField.getStyleClass().add("text-field");
+        minSizeField.getStyleClass().add("text-field-dark");
 
         Label maxSizeLabel = new Label("Max Size:");
         maxSizeLabel.getStyleClass().add("text-field-label");
         maxSizeField = new TextField();
-        maxSizeField.setPrefWidth(100);
-        maxSizeField.getStyleClass().add("text-field");
+        maxSizeField.getStyleClass().add("text-field-dark");
 
         Label stepSizeLabel = new Label("Step Size:");
         stepSizeLabel.getStyleClass().add("text-field-label");
         stepSizeField = new TextField();
-        stepSizeField.setPrefWidth(100);
-        stepSizeField.getStyleClass().add("text-field");
+        stepSizeField.getStyleClass().add("text-field-dark");
 
         GridPane rangeInputGrid = new GridPane();
         rangeInputGrid.setHgap(10);
-        rangeInputGrid.setVgap(5);
-        rangeInputGrid.getStyleClass().add("range-input-grid");
+        rangeInputGrid.setVgap(10);
         rangeInputGrid.add(minSizeLabel, 0, 0);
         rangeInputGrid.add(minSizeField, 1, 0);
         rangeInputGrid.add(maxSizeLabel, 2, 0);
@@ -124,101 +128,115 @@ public class InputPane extends VBox {
         rangeInputGrid.add(stepSizeField, 1, 1);
 
         rangeInputBox = new VBox(5, rangeInputGrid);
-        rangeInputBox.getStyleClass().add("input-section-box");
         rangeInputBox.setVisible(false);
+        rangeInputBox.setManaged(false);
 
-        manualInputLabel = new Label("Manual Input Data:");
-        manualInputLabel.getStyleClass().add("text-field-label");
-        manualInputLabel.setStyle("-fx-text-fill: #f0f0f0;");
+        // Manual Input Area
         manualInputArea = new TextArea();
         manualInputArea.setWrapText(true);
-        manualInputArea.setPrefRowCount(5);
-        manualInputArea.getStyleClass().add("manual-input-area");
-        manualInputArea.setDisable(true);
+        manualInputArea.setPrefRowCount(3);
+        manualInputArea.getStyleClass().add("code-input");
         manualInputArea.setVisible(false);
+        manualInputArea.setManaged(false);
 
-        singleInputRadio.setOnAction(e -> toggleInputMode());
-        rangeInputRadio.setOnAction(e -> toggleInputMode());
-        manualInputRadio.setOnAction(e -> toggleInputFields());
-        randomInputRadio.setOnAction(e -> toggleInputFields());
-        hardcodedInputRadio.setOnAction(e -> toggleInputFields());
+        singleInputBtn.setOnAction(e -> {
+            if (!singleInputBtn.isSelected()) singleInputBtn.setSelected(true); // Prevent unselecting
+            toggleInputMode();
+        });
+        rangeInputBtn.setOnAction(e -> {
+            if (!rangeInputBtn.isSelected()) rangeInputBtn.setSelected(true);
+            toggleInputMode();
+        });
+        manualInputBtn.setOnAction(e -> {
+            if (!manualInputBtn.isSelected()) manualInputBtn.setSelected(true);
+            toggleInputFields();
+        });
+        randomInputBtn.setOnAction(e -> {
+            if (!randomInputBtn.isSelected()) randomInputBtn.setSelected(true);
+            toggleInputFields();
+        });
+        hardcodedInputBtn.setOnAction(e -> {
+            if (!hardcodedInputBtn.isSelected()) hardcodedInputBtn.setSelected(true);
+            toggleInputFields();
+        });
 
-        Button analyzeButton = new Button("Analyze");
+        // Bottom Buttons
+        Button analyzeButton = new Button("▶ Analyze");
         analyzeButton.getStyleClass().add("analyze-button");
         analyzeButton.setOnAction(e -> { if (onAnalyze != null) onAnalyze.run(); });
 
-        Button clearButton = new Button("Clear");
+        Button clearButton = new Button("🗑 Clear");
         clearButton.getStyleClass().add("clear-button");
         clearButton.setOnAction(e -> { if (onClear != null) onClear.run(); });
 
-        HBox buttonBox = new HBox(10);
-        buttonBox.getChildren().addAll(analyzeButton, clearButton);
-        buttonBox.setAlignment(Pos.CENTER_LEFT);
-
-        Region spacer = new Region();
-        VBox.setVgrow(spacer, Priority.ALWAYS);
-
-        HBox userManualBox = new HBox();
-        userManualBox.setAlignment(Pos.CENTER_RIGHT);
-        Button userManualButton = new Button("User Manual");
+        Button userManualButton = new Button("📖 User Manual");
         userManualButton.getStyleClass().add("user-manual-button");
         userManualButton.setOnAction(e -> showUserManual());
-        userManualBox.getChildren().add(userManualButton);
+
+        HBox buttonBox = new HBox(15, analyzeButton, clearButton);
+        buttonBox.setAlignment(Pos.CENTER_LEFT);
+        
+        Region spacer = new Region();
+        HBox.setHgrow(spacer, Priority.ALWAYS);
+        
+        HBox bottomBox = new HBox(buttonBox, spacer, userManualButton);
+        bottomBox.setAlignment(Pos.CENTER);
+
+        VBox contentBox = new VBox(15, 
+                inputModeLabel, inputTypeBox, 
+                dataSourceLabel, singleInputBox, 
+                arrayTypeBox, 
+                rangeInputBox, manualInputArea, inputSizeBox);
 
         getChildren().addAll(
-                titleLabel,
+                titleBox,
                 codeInputArea,
-                inputTypeBox,
-                singleInputBox,
-                arrayTypeBox,
-                rangeInputBox,
-                manualInputLabel,
-                manualInputArea,
-                inputSizeBox,
-                buttonBox,
-                spacer,
-                userManualBox
+                contentBox,
+                new Region(), // Spacer
+                bottomBox
         );
+        
+        VBox.setVgrow(getChildren().get(3), Priority.ALWAYS); // Make spacer grow
 
         toggleInputFields();
     }
 
     private void toggleInputFields() {
-        if (manualInputRadio.isSelected()) {
-            manualInputArea.setDisable(false);
+        if (manualInputBtn.isSelected()) {
+            manualInputArea.setManaged(true);
             manualInputArea.setVisible(true);
-            manualInputLabel.setVisible(true);
+            inputSizeBox.setManaged(false);
             inputSizeBox.setVisible(false);
-        } else if (randomInputRadio.isSelected()) {
-            manualInputArea.setDisable(true);
+        } else if (randomInputBtn.isSelected()) {
+            manualInputArea.setManaged(false);
             manualInputArea.setVisible(false);
-            manualInputLabel.setVisible(false);
+            inputSizeBox.setManaged(true);
             inputSizeBox.setVisible(true);
-            inputSizeField.setDisable(false);
-            inputSizeField.setStyle("-fx-text-fill: black; -fx-background-color: white;");
         } else { // Hardcoded input selected
-            manualInputArea.setDisable(true);
+            manualInputArea.setManaged(false);
             manualInputArea.setVisible(false);
-            manualInputLabel.setVisible(false);
+            inputSizeBox.setManaged(false);
             inputSizeBox.setVisible(false);
         }
     }
 
     private void toggleInputMode() {
-        if (singleInputRadio.isSelected()) {
+        if (singleInputBtn.isSelected()) {
+            rangeInputBox.setManaged(false);
             rangeInputBox.setVisible(false);
-            manualInputRadio.setDisable(false);
-            randomInputRadio.setDisable(false);
-            hardcodedInputRadio.setDisable(false);
+            manualInputBtn.setDisable(false);
+            randomInputBtn.setDisable(false);
+            hardcodedInputBtn.setDisable(false);
             toggleInputFields();
-        } else if (rangeInputRadio.isSelected()) {
+        } else if (rangeInputBtn.isSelected()) {
+            rangeInputBox.setManaged(true);
             rangeInputBox.setVisible(true);
-            manualInputRadio.setDisable(true);
-            randomInputRadio.setDisable(true);
-            hardcodedInputRadio.setDisable(true);
-            manualInputArea.setDisable(true);
+            manualInputBtn.setDisable(true);
+            randomInputBtn.setDisable(true);
+            hardcodedInputBtn.setDisable(true);
+            manualInputArea.setManaged(false);
             manualInputArea.setVisible(false);
-            manualInputLabel.setVisible(false);
+            inputSizeBox.setManaged(false);
             inputSizeBox.setVisible(false);
         }
     }
@@ -234,9 +252,9 @@ public class InputPane extends VBox {
     public String getCode() { return codeInputArea.getText(); }
     public void clearCode() { codeInputArea.clear(); }
 
-    public boolean isRangeInput() { return rangeInputRadio.isSelected(); }
-    public boolean isManualInput() { return manualInputRadio.isSelected(); }
-    public boolean isRandomInput() { return randomInputRadio.isSelected(); }
+    public boolean isRangeInput() { return rangeInputBtn.isSelected(); }
+    public boolean isManualInput() { return manualInputBtn.isSelected(); }
+    public boolean isRandomInput() { return randomInputBtn.isSelected(); }
 
     public String getManualInputText() { return manualInputArea.getText(); }
     public String getInputSizeText() { return inputSizeField.getText(); }
