@@ -95,7 +95,7 @@ public class CodeAnalyzerUI extends Application {
         codeInputArea.getStyleClass().add("code-input");
         codeInputArea.setWrapText(true);
         codeInputArea.setPrefRowCount(20);
-
+        codeInputArea.setStyle("-fx-control-inner-background: #333333; -fx-text-fill: #ffffff; -fx-font-family: 'Consolas', monospace;");
 
         manualInputRadio = new RadioButton("Manual Input");
         randomInputRadio = new RadioButton("Random Input");
@@ -384,12 +384,15 @@ public class CodeAnalyzerUI extends Application {
 
         Label titleLabel = new Label(title);
         titleLabel.getStyleClass().add("title-label");
+        titleLabel.setStyle("-fx-text-fill: #f0f0f0;");
 
         TextArea dataArea = new TextArea(data);
         dataArea.setEditable(false);
         dataArea.setWrapText(true);
         dataArea.setPrefRowCount(20);
         dataArea.getStyleClass().add("data-area");
+        // Set text and background colors for better visibility
+        dataArea.setStyle("-fx-control-inner-background: #2b2b2b; -fx-text-fill: #ffffff; -fx-font-family: 'Consolas', monospace; -fx-font-size: 13px;");
 
         Button closeButton = new Button("Close");
         closeButton.getStyleClass().add("close-button");
