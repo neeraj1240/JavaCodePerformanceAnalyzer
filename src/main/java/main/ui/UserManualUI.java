@@ -134,7 +134,7 @@ public class UserManualUI {
                         "• Influenced by system resources\n" +
                         "• JVM warm-up can affect initial measurements\n" +
                         "• Background processes may impact results\n" +
-                        "• Small input sizes may not show true complexity\n\n" +
+                        "• Small input sizes may not reflect performance trends under load\n\n" +
                         "MEMORY MEASUREMENT LIMITATIONS:\n" +
                         "• Includes JVM overhead\n" +
                         "• Garbage collection can introduce variations\n" +
@@ -142,49 +142,29 @@ public class UserManualUI {
                         "• Platform-specific memory management"
         );
 
-        // 3. Complexity Analysis Challenges
-        VBox complexityLimitations = new VBox(10);
-        Label complexityTitle = new Label("3. Complexity Analysis Challenges");
-        complexityTitle.getStyleClass().add("section-title");
-        TextArea complexityContent = createInfoArea(
-                "TIME COMPLEXITY CHALLENGES:\n" +
-                        "• Automated detection is an approximation\n" +
-                        "• May not capture nuanced algorithm behaviors\n" +
-                        "• Limited by input size and test cases\n\n" +
-                        "POTENTIAL MISCLASSIFICATIONS:\n" +
-                        "• O(n) might be misidentified as O(log n)\n" +
-                        "• Constant-time operations can look linear\n" +
-                        "• Hybrid algorithms may be hard to classify\n\n" +
-                        "FACTORS AFFECTING ACCURACY:\n" +
-                        "• Input data distribution\n" +
-                        "• Hardware specifications\n" +
-                        "• JVM optimizations\n" +
-                        "• Specific implementation details"
-        );
-
-        // 4. Scenarios of Inaccurate Measurements
+        // 3. Scenarios of Potential Inaccuracies
         VBox scenarios = new VBox(10);
-        Label scenariosTitle = new Label("4. Scenarios of Potential Inaccuracies");
+        Label scenariosTitle = new Label("3. Scenarios of Potential Inaccuracies");
         scenariosTitle.getStyleClass().add("section-title");
         TextArea scenariosContent = createInfoArea(
                 "POTENTIAL INACCURACY SCENARIOS:\n\n" +
                         "1. Very Small Input Sizes\n" +
-                        "   • Complexity might not be clearly visible\n" +
+                        "   • Performance trends might not be clearly visible\n" +
                         "   • JVM optimizations can mask true performance\n\n" +
                         "2. Recursive Algorithms\n" +
                         "   • Overhead of function calls can skew measurements\n" +
                         "   • Tail recursion optimizations vary\n\n" +
-                        "3. Algorithms with Conditional Complexity\n" +
-                        "   • Different input scenarios yield different complexities\n" +
+                        "3. Algorithms with Input-Dependent Behavior\n" +
+                        "   • Different input distributions yield different execution characteristics\n" +
                         "   • Single test might not represent all cases\n\n" +
                         "4. Memory-Intensive Algorithms\n" +
                         "   • Garbage collection can introduce variations\n" +
                         "   • Platform-specific memory management"
         );
 
-        // 5. Best Practices for Accurate Analysis
+        // 4. Best Practices for Accurate Analysis
         VBox bestPractices = new VBox(10);
-        Label bestPracticesTitle = new Label("5. Best Practices for Accurate Analysis");
+        Label bestPracticesTitle = new Label("4. Best Practices for Accurate Analysis");
         bestPracticesTitle.getStyleClass().add("section-title");
         TextArea bestPracticesContent = createInfoArea(
                 "IMPROVING ACCURACY:\n" +
@@ -200,38 +180,15 @@ public class UserManualUI {
                         "• Consider multiple test scenarios"
         );
 
-        // 6. Understanding Complexity Notations
-        VBox complexityNotation = new VBox(10);
-        Label notationTitle = new Label("6. Understanding Complexity Notations");
-        notationTitle.getStyleClass().add("section-title");
-        TextArea notationContent = createInfoArea(
-                "COMPLEXITY NOTATION GUIDE:\n\n" +
-                        "O(1): Constant Time\n" +
-                        "   • Executes in same time regardless of input\n" +
-                        "   • Most predictable performance\n\n" +
-                        "O(log n): Logarithmic Time\n" +
-                        "   • Performance increases slowly\n" +
-                        "   • Efficient for large datasets\n\n" +
-                        "O(n): Linear Time\n" +
-                        "   • Performance grows linearly with input\n" +
-                        "   • Straightforward, predictable growth\n\n" +
-                        "O(n log n): Linearithmic Time\n" +
-                        "   • Common in efficient sorting algorithms\n" +
-                        "   • Balance between linear and quadratic\n\n" +
-                        "O(n²): Quadratic Time\n" +
-                        "   • Performance degrades quickly\n" +
-                        "   • Nested loops are typical causes"
-        );
-
-        // 7. Improvement and Feedback
+        // 5. Continuous Improvement
         VBox improvement = new VBox(10);
-        Label improvementTitle = new Label("7. Continuous Improvement");
+        Label improvementTitle = new Label("5. Continuous Improvement");
         improvementTitle.getStyleClass().add("section-title");
         TextArea improvementContent = createInfoArea(
                 "OUR COMMITMENT:\n" +
                         "• Continuously refining analysis algorithms\n" +
                         "• Incorporating user feedback\n" +
-                        "• Expanding complexity detection capabilities\n\n" +
+                        "• Expanding performance analysis capabilities\n\n" +
                         "HOW YOU CAN HELP:\n" +
                         "• Report unusual or unexpected results\n" +
                         "• Provide diverse test cases\n" +
@@ -242,10 +199,8 @@ public class UserManualUI {
                 titleLabel,
                 overview, overviewTitle, overviewContent,
                 measurementLimitations, measurementTitle, measurementContent,
-                complexityLimitations, complexityTitle, complexityContent,
                 scenarios, scenariosTitle, scenariosContent,
                 bestPractices, bestPracticesTitle, bestPracticesContent,
-                complexityNotation, notationTitle, notationContent,
                 improvement, improvementTitle, improvementContent
         );
 
@@ -467,11 +422,9 @@ public class UserManualUI {
         Label overviewTitle = new Label("1. Overview");
         overviewTitle.getStyleClass().add("section-title");
         TextArea overviewContent = createInfoArea(
-                "The analyzer evaluates your code's performance across four key metrics:\n\n" +
+                "The analyzer evaluates your code's performance across two key metrics:\n\n" +
                         "1. Execution Time: How long your code takes to run\n" +
-                        "2. Memory Usage: How much memory your code consumes\n" +
-                        "3. Time Complexity: The growth rate of execution time with input size\n" +
-                        "4. Space Complexity: The growth rate of memory usage with input size\n\n" +
+                        "2. Memory Usage: How much memory your code consumes\n\n" +
                         "These metrics help you understand your code's efficiency and scalability."
         );
 
@@ -515,43 +468,24 @@ public class UserManualUI {
                         "• Check for unnecessary object creation"
         );
 
-        // 4. Complexity Analysis
-        VBox complexityAnalysis = new VBox(10);
-        Label complexityTitle = new Label("4. Complexity Analysis");
-        complexityTitle.getStyleClass().add("section-title");
-        TextArea complexityContent = createInfoArea(
-                "TIME COMPLEXITY:\n" +
-                        "• Determined by analyzing execution time patterns\n" +
-                        "• Common complexities: O(1), O(log n), O(n), O(n log n), O(n²)\n" +
-                        "• Based on how execution time grows with input size\n\n" +
-                        "SPACE COMPLEXITY:\n" +
-                        "• Analyzed through memory usage patterns\n" +
-                        "• Considers both auxiliary and input space\n" +
-                        "• Helps identify memory-intensive operations\n\n" +
-                        "INTERPRETATION:\n" +
-                        "• Lower complexity orders are better\n" +
-                        "• Consider trade-offs between time and space\n" +
-                        "• Look for opportunities to optimize"
-        );
-
-        // 5. Performance Visualization
+        // 4. Performance Visualization
         VBox visualization = new VBox(10);
-        Label vizTitle = new Label("5. Performance Visualization");
+        Label vizTitle = new Label("4. Performance Visualization");
         vizTitle.getStyleClass().add("section-title");
         TextArea vizContent = createInfoArea(
                 "GRAPHS AND CHARTS:\n" +
                         "• Time Graph: Shows execution time trends\n" +
                         "• Memory Graph: Displays memory usage patterns\n" +
-                        "• Complexity curves for different input sizes\n\n" +
+                        "• Performance curves for different input sizes\n\n" +
                         "HOW TO USE:\n" +
                         "• Click 'Show Time Graph' or 'Show Memory Graph' buttons\n" +
                         "• Compare multiple runs with different input sizes\n" +
                         "• Use graphs to identify performance bottlenecks"
         );
 
-        // 6. Tips for Accurate Analysis
+        // 5. Tips for Accurate Analysis
         VBox tips = new VBox(10);
-        Label tipsTitle = new Label("6. Tips for Accurate Analysis");
+        Label tipsTitle = new Label("5. Tips for Accurate Analysis");
         tipsTitle.getStyleClass().add("section-title");
         TextArea tipsContent = createInfoArea(
                 "FOR EXECUTION TIME:\n" +
@@ -568,9 +502,9 @@ public class UserManualUI {
                         "• Consider both average and worst-case scenarios"
         );
 
-        // 7. Understanding Results
+        // 6. Understanding Results
         VBox results = new VBox(10);
-        Label resultsTitle = new Label("7. Understanding Results");
+        Label resultsTitle = new Label("6. Understanding Results");
         resultsTitle.getStyleClass().add("section-title");
         TextArea resultsContent = createInfoArea(
                 "EXECUTION TIME INDICATORS:\n" +
@@ -591,7 +525,6 @@ public class UserManualUI {
                 overview, overviewTitle, overviewContent,
                 timeAnalysis, timeTitle, timeContent,
                 memoryAnalysis, memoryTitle, memoryContent,
-                complexityAnalysis, complexityTitle, complexityContent,
                 visualization, vizTitle, vizContent,
                 tips, tipsTitle, tipsContent,
                 results, resultsTitle, resultsContent
@@ -652,7 +585,7 @@ public class UserManualUI {
         TextArea randomContent = createInfoArea(
                 "WHEN TO USE:\n" +
                         "• Testing algorithm performance with large datasets\n" +
-                        "• Analyzing time complexity with varying input sizes\n" +
+                        "• Analyzing execution behavior with varying input sizes\n" +
                         "• Stress testing your program\n" +
                         "• When specific test cases aren't critical\n\n" +
                         "HOW IT WORKS:\n" +

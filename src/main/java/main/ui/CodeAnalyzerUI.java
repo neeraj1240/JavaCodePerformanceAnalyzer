@@ -711,19 +711,7 @@ public class CodeAnalyzerUI extends Application {
         memoryGraphBtn.setOnAction(e -> showMemoryGraph());
         memoryBox.getChildren().addAll(memoryLabel, memoryUnitBox, memoryGraphBtn);
 
-        VBox timeComplexityBox = new VBox(5);
-        timeComplexityBox.getStyleClass().add("result-box");
-        Label timeComplexityLabel = new Label(String.format("Time Complexity: %s", result.getTimeComplexity()));
-        timeComplexityLabel.setStyle("-fx-text-fill: #b2ebf2;");
-        timeComplexityBox.getChildren().add(timeComplexityLabel);
-
-        VBox spaceComplexityBox = new VBox(5);
-        spaceComplexityBox.getStyleClass().add("result-box");
-        Label spaceComplexityLabel = new Label(String.format("Space Complexity: %s", result.getSpaceComplexity()));
-        spaceComplexityLabel.setStyle("-fx-text-fill: #b2ebf2;");
-        spaceComplexityBox.getChildren().add(spaceComplexityLabel);
-
-        resultArea.getChildren().addAll(timeBox, memoryBox, timeComplexityBox, spaceComplexityBox);
+        resultArea.getChildren().addAll(timeBox, memoryBox);
     }
 
     private void displayDefaultResults() {
@@ -762,19 +750,7 @@ public class CodeAnalyzerUI extends Application {
         memoryGraphBtn.setStyle("-fx-text-fill: #f0f0f0;");
         memoryBox.getChildren().addAll(memoryLabel, memoryUnitBox, memoryGraphBtn);
 
-        VBox timeComplexityBox = new VBox(5);
-        timeComplexityBox.getStyleClass().add("result-box");
-        Label timeComplexityLabel = new Label("Time Complexity: N/A");
-        timeComplexityLabel.setStyle("-fx-text-fill: #b2ebf2;");
-        timeComplexityBox.getChildren().add(timeComplexityLabel);
-
-        VBox spaceComplexityBox = new VBox(5);
-        spaceComplexityBox.getStyleClass().add("result-box");
-        Label spaceComplexityLabel = new Label("Space Complexity: N/A");
-        spaceComplexityLabel.setStyle("-fx-text-fill: #b2ebf2;");
-        spaceComplexityBox.getChildren().add(spaceComplexityLabel);
-
-        resultArea.getChildren().addAll(timeBox, memoryBox, timeComplexityBox, spaceComplexityBox);
+        resultArea.getChildren().addAll(timeBox, memoryBox);
     }
 
     private void updateTimeDisplay() {

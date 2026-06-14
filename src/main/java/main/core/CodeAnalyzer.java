@@ -12,8 +12,7 @@ public class CodeAnalyzer {
     private final CodeCompiler codeCompiler = new CodeCompiler();
     private final CodeExecutor codeExecutor = new CodeExecutor();
     private final InputGenerator inputGenerator = new InputGenerator();
-    private final ComplexityAnalyzer complexityAnalyzer = new ComplexityAnalyzer();
-    private final EmpiricalComplexityAnalyzer empiricalComplexityAnalyzer = new EmpiricalComplexityAnalyzer();
+
 
     public String getGeneratedInput() {
         return inputGenerator.getGeneratedInput();
@@ -116,14 +115,11 @@ public class CodeAnalyzer {
                         times[i] = measurements.get(i)[1];
                         memories[i] = measurements.get(i)[2];
                     }
-                    String timeComplexity = empiricalComplexityAnalyzer.inferComplexity(sizesArr, times);
-                    String spaceComplexity = empiricalComplexityAnalyzer.inferComplexity(sizesArr, memories);
-                    
                     // Return result with last measurement and its size
                     double lastAvgTime = times[times.length - 1];
                     double lastAvgMemory = memories[memories.length - 1];
                     int lastSize = (int)sizesArr[sizesArr.length - 1];
-                    return new AnalysisResult(lastAvgTime, lastAvgMemory, timeComplexity, spaceComplexity, lastSize);
+                    return new AnalysisResult(lastAvgTime, lastAvgMemory, lastSize);
                 } else {
                     throw new Exception("Invalid input format for detailed analysis");
                 }
@@ -160,9 +156,7 @@ public class CodeAnalyzer {
                 }
                 double avgTime = totalTime / MEASUREMENT_RUNS;
                 double avgMemory = totalMemory / MEASUREMENT_RUNS;
-                String timeComplexity = complexityAnalyzer.analyzeTimeComplexity(code);
-                String spaceComplexity = complexityAnalyzer.analyzeSpaceComplexity(code);
-                return new AnalysisResult(avgTime, avgMemory, timeComplexity, spaceComplexity, inputSize);
+                return new AnalysisResult(avgTime, avgMemory, inputSize);
             }
         } finally {
             codeCompiler.deleteDirectory(tempDir);
