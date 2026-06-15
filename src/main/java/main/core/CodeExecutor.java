@@ -19,7 +19,8 @@ import org.openjdk.jmh.profile.GCProfiler;
 
 public class CodeExecutor {
 
-    public static class PerformanceMetrics {
+    public static class PerformanceMetrics implements Serializable {
+        private static final long serialVersionUID = 1L;
         public final double executionTime;
         public final double memoryUsed;
         public final double throughput;
@@ -150,12 +151,20 @@ public class CodeExecutor {
 
         inputThread.start();
         outputThread.start();
-        inputThread.join();
-        outputThread.join();
+        
+        try {
+            inputThread.join();
+            outputThread.join();
 
-        if (!runProcess.waitFor(10, TimeUnit.SECONDS)) {
+            if (!runProcess.waitFor(10, TimeUnit.SECONDS)) {
+                runProcess.destroyForcibly();
+                throw new Exception("Process timed out");
+            }
+        } catch (InterruptedException e) {
             runProcess.destroyForcibly();
-            throw new Exception("Process timed out");
+            inputThread.interrupt();
+            outputThread.interrupt();
+            throw e;
         }
 
         int exitCode = runProcess.exitValue();
@@ -167,15 +176,60 @@ public class CodeExecutor {
 
         // Step 2: Write input to a temp file for the JMH benchmark
         Path tempInputFile = Files.createTempFile("jmh_input_", ".txt");
+        Path resultFile = Files.createTempFile("jmh_result_", ".dat");
         try {
             Files.write(tempInputFile, input.getBytes());
 
-            // Step 3: Configure and run JMH
+            // Step 3: Run JMH in a separate process to allow forceful termination
+            ProcessBuilder pb = new ProcessBuilder(
+                    "java",
+                    "-cp",
+                    System.getProperty("java.class.path"),
+                    "main.core.CodeExecutor",
+                    "JMH_RUN",
+                    directory.getAbsolutePath(),
+                    className,
+                    tempInputFile.toAbsolutePath().toString(),
+                    resultFile.toAbsolutePath().toString()
+            );
+            
+            // Redirect output to avoid console clutter, or you can inheritIO
+            pb.redirectOutput(ProcessBuilder.Redirect.DISCARD);
+            pb.redirectError(ProcessBuilder.Redirect.DISCARD);
+            
+            Process jmhProcess = pb.start();
+            try {
+                int jmhExit = jmhProcess.waitFor();
+                if (jmhExit != 0) {
+                    throw new Exception("JMH benchmarking process failed with exit code " + jmhExit);
+                }
+                
+                try (ObjectInputStream ois = new ObjectInputStream(new FileInputStream(resultFile.toFile()))) {
+                    return (PerformanceMetrics) ois.readObject();
+                }
+            } catch (InterruptedException e) {
+                jmhProcess.destroyForcibly();
+                throw e;
+            }
+
+        } finally {
+            Files.deleteIfExists(tempInputFile);
+            Files.deleteIfExists(resultFile);
+        }
+    }
+
+    public static void main(String[] args) throws Exception {
+        if (args.length >= 5 && args[0].equals("JMH_RUN")) {
+            String classDir = args[1];
+            String className = args[2];
+            String inputFilePath = args[3];
+            String resultFilePath = args[4];
+
             Options opt = new OptionsBuilder()
                     .include(".*" + UserCodeBenchmark.class.getSimpleName() + ".*")
-                    .param("classDir", directory.getAbsolutePath())
+                    .param("classDir", classDir)
                     .param("className", className)
-                    .param("inputFilePath", tempInputFile.toAbsolutePath().toString())
+                    .param("inputFilePath", inputFilePath)
                     .forks(1)
                     .warmupIterations(2)
                     .warmupTime(org.openjdk.jmh.runner.options.TimeValue.seconds(1))
@@ -186,7 +240,7 @@ public class CodeExecutor {
 
             Collection<RunResult> results = new Runner(opt).run();
             if (results == null || results.isEmpty()) {
-                throw new Exception("JMH benchmarking failed to produce results.");
+                System.exit(1);
             }
 
             double timeMs = 0;
@@ -221,12 +275,13 @@ public class CodeExecutor {
                 }
             }
 
-            return new PerformanceMetrics(timeMs, memoryUsedBytes, throughputOpsPerSec, gcPauseTimeMs,
+            PerformanceMetrics metrics = new PerformanceMetrics(timeMs, memoryUsedBytes, throughputOpsPerSec, gcPauseTimeMs,
                     heapAllocationRateMbPerSec, p50LatencyMs, p95LatencyMs, p99LatencyMs);
 
-
-        } finally {
-            Files.deleteIfExists(tempInputFile);
+            try (ObjectOutputStream oos = new ObjectOutputStream(new FileOutputStream(resultFilePath))) {
+                oos.writeObject(metrics);
+            }
+            System.exit(0);
         }
     }
 }

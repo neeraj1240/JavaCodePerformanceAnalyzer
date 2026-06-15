@@ -30,6 +30,9 @@ public class AnalysisController {
     private DataDisplayWindow inputDataWindow;
     private DataDisplayWindow outputDataWindow;
 
+    private Task<?> currentAnalysisTask;
+    private Thread currentAnalysisThread;
+
     public AnalysisController(InputPane inputPane, ResultPane resultPane) {
         this.inputPane = inputPane;
         this.resultPane = resultPane;
@@ -102,6 +105,13 @@ public class AnalysisController {
     }
 
     private void handleClear() {
+        if (currentAnalysisTask != null && currentAnalysisTask.isRunning()) {
+            currentAnalysisTask.cancel(true);
+        }
+        if (currentAnalysisThread != null && currentAnalysisThread.isAlive()) {
+            currentAnalysisThread.interrupt();
+        }
+
         inputPane.clearCode();
         inputPane.clearInputSize();
         resultPane.displayDefaultResults();
@@ -131,6 +141,11 @@ public class AnalysisController {
     }
 
     private void handleAnalyze() {
+        if (currentAnalysisTask != null && currentAnalysisTask.isRunning()) {
+            UIUtils.showError("An analysis is currently running. Please wait or clear to cancel it.");
+            return;
+        }
+
         String code = inputPane.getCode();
         if (code.isEmpty()) {
             UIUtils.showError("Please enter code to analyze.");
@@ -228,10 +243,15 @@ public class AnalysisController {
             analysisTask.setOnFailed(e -> {
                 resultPane.setAnalyzing(false, null);
                 Throwable exception = analysisTask.getException();
-                UIUtils.showError(exception.getMessage());
+                // Avoid showing error dialog if the task was cancelled intentionally
+                if (!(exception instanceof InterruptedException)) {
+                    UIUtils.showError(exception.getMessage());
+                }
             });
 
-            new Thread(analysisTask).start();
+            currentAnalysisTask = analysisTask;
+            currentAnalysisThread = new Thread(analysisTask);
+            currentAnalysisThread.start();
 
         } catch (NumberFormatException e) {
             UIUtils.showError("Please enter a valid input size.");
@@ -274,6 +294,9 @@ public class AnalysisController {
                 protected List<AnalysisResult> call() throws Exception {
                     List<AnalysisResult> results = new ArrayList<>();
                     for (int currentSize = minSize; currentSize <= maxSize; currentSize += stepSize) {
+                        if (isCancelled()) {
+                            break;
+                        }
                         final int finalSize = currentSize; 
                         updateMessage(String.format("Analyzing size: %d", finalSize));
                         String input = analyzer.generateInput(code, finalSize);
@@ -314,10 +337,14 @@ public class AnalysisController {
             analysisTask.setOnFailed(e -> {
                 resultPane.setAnalyzing(false, null);
                 Throwable exception = analysisTask.getException();
-                UIUtils.showError(exception.getMessage());
+                if (!(exception instanceof InterruptedException)) {
+                    UIUtils.showError(exception.getMessage());
+                }
             });
 
-            new Thread(analysisTask).start();
+            currentAnalysisTask = analysisTask;
+            currentAnalysisThread = new Thread(analysisTask);
+            currentAnalysisThread.start();
 
         } catch (NumberFormatException e) {
             UIUtils.showError("Please enter valid numbers for min size, max size, and step size.");
