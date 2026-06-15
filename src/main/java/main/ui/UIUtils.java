@@ -4,6 +4,7 @@ import javafx.scene.control.Alert;
 import javafx.scene.control.Labeled;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
+import javafx.stage.Stage;
 
 public class UIUtils {
     public static void showError(String message) {
@@ -11,6 +12,7 @@ public class UIUtils {
         alert.setTitle("Error");
         alert.setHeaderText(null);
         alert.setContentText(message);
+        applyStageIconWhenShown(alert);
         alert.showAndWait();
     }
 
@@ -19,6 +21,7 @@ public class UIUtils {
         alert.setTitle(title);
         alert.setHeaderText(null);
         alert.setContentText(content);
+        applyStageIconWhenShown(alert);
         alert.showAndWait();
     }
 
@@ -39,5 +42,26 @@ public class UIUtils {
         } catch (Exception e) {
             System.err.println("Error loading icon from " + resourcePath + ": " + e.getMessage());
         }
+    }
+
+    public static void setStageIcon(Stage stage) {
+        try {
+            var stream = UIUtils.class.getResourceAsStream("/logo.png");
+            if (stream != null) {
+                stage.getIcons().add(new Image(stream));
+            } else {
+                System.err.println("Application logo not found at: /logo.png");
+            }
+        } catch (Exception e) {
+            System.err.println("Could not load application logo: " + e.getMessage());
+        }
+    }
+
+    private static void applyStageIconWhenShown(Alert alert) {
+        alert.setOnShown(event -> {
+            if (alert.getDialogPane().getScene().getWindow() instanceof Stage stage) {
+                setStageIcon(stage);
+            }
+        });
     }
 }

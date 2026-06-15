@@ -27,6 +27,7 @@ public class DataDisplayWindow {
             stage = new Stage();
             stage.setTitle(windowTitle);
             stage.initModality(Modality.NONE);
+            UIUtils.setStageIcon(stage);
         }
 
         VBox content = new VBox(10);

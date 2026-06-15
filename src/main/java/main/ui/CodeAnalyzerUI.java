@@ -4,7 +4,6 @@ import javafx.application.Application;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Scene;
-import javafx.scene.image.Image;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;
 import javafx.stage.Stage;
@@ -13,12 +12,7 @@ public class CodeAnalyzerUI extends Application {
 
     @Override
     public void start(Stage primaryStage) {
-        try {
-            Image icon = new Image(getClass().getResourceAsStream("/logo.png"));
-            primaryStage.getIcons().add(icon);
-        } catch (Exception e) {
-            System.err.println("Could not load application icon: " + e.getMessage());
-        }
+        UIUtils.setStageIcon(primaryStage);
 
         HBox mainLayout = new HBox(20);
         mainLayout.getStyleClass().add("main-layout");

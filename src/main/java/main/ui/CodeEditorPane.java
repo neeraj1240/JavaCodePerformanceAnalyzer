@@ -116,6 +116,7 @@ public class CodeEditorPane extends StackPane {
             fullScreenStage = new Stage();
             fullScreenStage.initStyle(StageStyle.UNDECORATED);
             fullScreenStage.initModality(Modality.APPLICATION_MODAL);
+            UIUtils.setStageIcon(fullScreenStage);
             
             StackPane root = new StackPane(this);
             root.setStyle("-fx-background-color: #0b0f19; -fx-padding: 20px;");

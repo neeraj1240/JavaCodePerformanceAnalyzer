@@ -491,6 +491,7 @@ public class GraphManager {
     private Stage setupGraphStage(AreaChart<Number, Number> AreaChart, VBox controlPanel, String title) {
         Stage graphStage = new Stage();
         graphStage.setTitle(title);
+        UIUtils.setStageIcon(graphStage);
 
         HBox root = new HBox(10);
         root.setPadding(new Insets(10));
@@ -512,6 +513,7 @@ public class GraphManager {
     private void showDataPointDetails(XYChart.Data<Number, Number> data) {
         Stage detailsStage = new Stage();
         detailsStage.setTitle("Data Point Details");
+        UIUtils.setStageIcon(detailsStage);
 
         VBox content = new VBox(10);
         content.setPadding(new Insets(20));
@@ -583,6 +585,11 @@ public class GraphManager {
         alert.setTitle(title);
         alert.setHeaderText(null);
         alert.setContentText(message);
+        alert.setOnShown(event -> {
+            if (alert.getDialogPane().getScene().getWindow() instanceof Stage stage) {
+                UIUtils.setStageIcon(stage);
+            }
+        });
         alert.showAndWait();
     }
 
