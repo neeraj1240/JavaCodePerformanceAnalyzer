@@ -195,8 +195,8 @@ public class InputPane extends VBox {
         clearButton.getStyleClass().add("clear-button");
         clearButton.setOnAction(e -> { if (onClear != null) onClear.run(); });
 
-        Button userManualButton = new Button("📖 User Manual");
-        userManualButton.setTooltip(new Tooltip("Open the user manual for instructions"));
+        Button userManualButton = new Button("❓ FAQ");
+        userManualButton.setTooltip(new Tooltip("Open the FAQ"));
         userManualButton.getStyleClass().add("user-manual-button");
         userManualButton.setOnAction(e -> showUserManual());
 

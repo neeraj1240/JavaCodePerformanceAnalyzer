@@ -14,7 +14,7 @@ public class CodeAnalyzerUI extends Application {
     @Override
     public void start(Stage primaryStage) {
         try {
-            Image icon = new Image(getClass().getResourceAsStream("/JAVA CODE PERFORMACE ANALYZER.png"));
+            Image icon = new Image(getClass().getResourceAsStream("/logo.png"));
             primaryStage.getIcons().add(icon);
         } catch (Exception e) {
             System.err.println("Could not load application icon: " + e.getMessage());
