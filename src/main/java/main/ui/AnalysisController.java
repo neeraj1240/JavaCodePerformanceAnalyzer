@@ -54,54 +54,30 @@ public class AnalysisController {
 
         resultPane.setOnShowInputData(this::showInputData);
         resultPane.setOnShowOutputData(this::showOutputData);
-        
-        resultPane.setOnShowTimeGraph(() -> {
-            try {
-                graphManager.showTimeGraph();
-            } catch (IllegalStateException ex) {
-                UIUtils.showError("No data available for time graph.");
-            }
-        });
-        
-        resultPane.setOnShowMemoryGraph(() -> {
-            try {
-                graphManager.showMemoryGraph();
-            } catch (IllegalStateException ex) {
-                UIUtils.showError("No data available for memory graph.");
-            }
-        });
+        resultPane.setOnShowTimeGraph(() -> handleShowGraph(graphManager::showTimeGraph, "execution time"));
+        resultPane.setOnShowMemoryGraph(() -> handleShowGraph(graphManager::showMemoryGraph, "memory usage"));
+        resultPane.setOnShowThroughputGraph(() -> handleShowGraph(graphManager::showThroughputGraph, "throughput"));
+        resultPane.setOnShowGcPauseTimeGraph(() -> handleShowGraph(graphManager::showGcPauseTimeGraph, "GC pause time"));
+        resultPane.setOnShowHeapAllocationRateGraph(() -> handleShowGraph(graphManager::showHeapAllocationRateGraph, "heap allocation rate"));
+        resultPane.setOnShowLatencyGraph(() -> handleShowGraph(graphManager::showLatencyGraph, "latency"));
+    }
 
-        resultPane.setOnShowThroughputGraph(() -> {
+    private void handleShowGraph(Runnable showGraphRunnable, String metricName) {
+        if (executionTimes.size() > 1) {
             try {
-                graphManager.showThroughputGraph();
+                showGraphRunnable.run();
             } catch (IllegalStateException ex) {
-                UIUtils.showError("No data available for throughput graph.");
+                UIUtils.showError("Error displaying graph: " + ex.getMessage());
             }
-        });
-
-        resultPane.setOnShowGcPauseTimeGraph(() -> {
-            try {
-                graphManager.showGcPauseTimeGraph();
-            } catch (IllegalStateException ex) {
-                UIUtils.showError("No data available for GC pause time graph.");
+        } else if (executionTimes.size() == 1) {
+            UIUtils.showError("This feature is only available for the Range Input type.");
+        } else { // size == 0
+            if (inputPane.isRangeInput()) {
+                UIUtils.showError("No data available for " + metricName + " graph. Please run the analysis first.");
+            } else {
+                UIUtils.showError("This feature is only available for the Range Input type.");
             }
-        });
-
-        resultPane.setOnShowHeapAllocationRateGraph(() -> {
-            try {
-                graphManager.showHeapAllocationRateGraph();
-            } catch (IllegalStateException ex) {
-                UIUtils.showError("No data available for heap allocation rate graph.");
-            }
-        });
-
-        resultPane.setOnShowLatencyGraph(() -> {
-            try {
-                graphManager.showLatencyGraph();
-            } catch (IllegalStateException ex) {
-                UIUtils.showError("No data available for latency graph.");
-            }
-        });
+        }
     }
 
     private void handleClear() {

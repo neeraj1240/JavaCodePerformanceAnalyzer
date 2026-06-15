@@ -93,8 +93,8 @@ public class GraphManager {
     }
 
     public void showTimeGraph() {
-        if (executionTimes.isEmpty()) {
-            throw new IllegalStateException("No data available for time graph.");
+        if (executionTimes.size() <= 1) {
+            throw new IllegalStateException("Graphs are only available for range analysis.");
         }
 
         NumberAxis xAxis = new NumberAxis("Input Size", 0,
@@ -116,8 +116,8 @@ public class GraphManager {
     }
 
     public void showMemoryGraph() {
-        if (memoryUsages.isEmpty()) {
-            throw new IllegalStateException("No data available for memory graph.");
+        if (memoryUsages.size() <= 1) {
+            throw new IllegalStateException("Graphs are only available for range analysis.");
         }
 
         NumberAxis xAxis = new NumberAxis("Input Size", 0,
@@ -139,7 +139,9 @@ public class GraphManager {
     }
 
     public void showThroughputGraph() {
-        if (throughputs.isEmpty()) throw new IllegalStateException("No data available for throughput graph.");
+        if (throughputs.size() <= 1) {
+            throw new IllegalStateException("Graphs are only available for range analysis.");
+        }
         NumberAxis xAxis = new NumberAxis("Input Size", 0, getMaxValue(inputSizes), calculateTickUnit(getMaxValue(inputSizes)));
         NumberAxis yAxis = new NumberAxis("Throughput (ops/sec)", 0, getMaxValue(throughputs), calculateTickUnit(getMaxValue(throughputs)));
         AreaChart<Number, Number> chart = createAreaChart(xAxis, yAxis, "Throughput vs Input Size");
@@ -152,7 +154,9 @@ public class GraphManager {
     }
 
     public void showGcPauseTimeGraph() {
-        if (gcPauseTimes.isEmpty()) throw new IllegalStateException("No data available for GC pause time graph.");
+        if (gcPauseTimes.size() <= 1) {
+            throw new IllegalStateException("Graphs are only available for range analysis.");
+        }
         NumberAxis xAxis = new NumberAxis("Input Size", 0, getMaxValue(inputSizes), calculateTickUnit(getMaxValue(inputSizes)));
         NumberAxis yAxis = new NumberAxis("GC Pause Time (ms)", 0, getMaxValue(gcPauseTimes), calculateTickUnit(getMaxValue(gcPauseTimes)));
         AreaChart<Number, Number> chart = createAreaChart(xAxis, yAxis, "GC Pause Time vs Input Size");
@@ -165,7 +169,9 @@ public class GraphManager {
     }
 
     public void showHeapAllocationRateGraph() {
-        if (heapAllocationRates.isEmpty()) throw new IllegalStateException("No data available for heap allocation rate graph.");
+        if (heapAllocationRates.size() <= 1) {
+            throw new IllegalStateException("Graphs are only available for range analysis.");
+        }
         NumberAxis xAxis = new NumberAxis("Input Size", 0, getMaxValue(inputSizes), calculateTickUnit(getMaxValue(inputSizes)));
         NumberAxis yAxis = new NumberAxis("Heap Allocation Rate (MB/sec)", 0, getMaxValue(heapAllocationRates), calculateTickUnit(getMaxValue(heapAllocationRates)));
         AreaChart<Number, Number> chart = createAreaChart(xAxis, yAxis, "Heap Allocation Rate vs Input Size");
@@ -178,7 +184,9 @@ public class GraphManager {
     }
 
     public void showLatencyGraph() {
-        if (p50Latencies.isEmpty()) throw new IllegalStateException("No data available for latency graph.");
+        if (p50Latencies.size() <= 1) {
+            throw new IllegalStateException("Graphs are only available for range analysis.");
+        }
         double maxP99 = getMaxValue(p99Latencies);
         NumberAxis xAxis = new NumberAxis("Input Size", 0, getMaxValue(inputSizes), calculateTickUnit(getMaxValue(inputSizes)));
         NumberAxis yAxis = new NumberAxis("Latency (ms)", 0, maxP99, calculateTickUnit(maxP99));
