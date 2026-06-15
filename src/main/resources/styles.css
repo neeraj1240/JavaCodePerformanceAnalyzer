@@ -170,6 +170,32 @@
     -fx-cursor: hand;
 }
 
+.combo-box-small {
+    -fx-background-color: #21262d;
+    -fx-border-color: #30363d;
+    -fx-border-radius: 6px;
+    -fx-background-radius: 6px;
+    -fx-text-fill: #c9d1d9;
+    -fx-font-size: 12px;
+}
+.combo-box-small .list-cell {
+    -fx-background-color: transparent;
+    -fx-text-fill: #c9d1d9;
+    -fx-padding: 5px 10px;
+}
+.combo-box-small .list-view {
+    -fx-background-color: #21262d;
+    -fx-border-color: #30363d;
+}
+.combo-box-small .list-cell:hover {
+    -fx-background-color: #30363d;
+}
+.combo-box-small:hover {
+    -fx-background-color: #30363d;
+    -fx-cursor: hand;
+}
+
+
 /* Text Fields */
 .text-field-dark {
     -fx-background-color: #21262d;
@@ -313,6 +339,22 @@
 .data-button-outline:hover {
     -fx-background-color: #30363d;
 }
+
+.view-graph-btn {
+    -fx-background-color: transparent;
+    -fx-border-color: #30363d;
+    -fx-text-fill: #c9d1d9;
+    -fx-font-weight: normal;
+    -fx-font-size: 12px;
+    -fx-border-radius: 6px;
+    -fx-background-radius: 6px;
+    -fx-padding: 8px 18px;
+    -fx-cursor: hand;
+}
+.view-graph-btn:hover {
+    -fx-background-color: #30363d;
+}
+
 
 /* ScrollBars */
 .scroll-bar:vertical,

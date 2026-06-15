@@ -64,6 +64,9 @@ public class InputPane extends VBox {
         rangeInputBtn.setMaxWidth(Double.MAX_VALUE);
         HBox.setHgrow(rangeInputBtn, Priority.ALWAYS);
 
+        singleInputBtn.setTooltip(new Tooltip("Analyze the code for a specific input size"));
+        rangeInputBtn.setTooltip(new Tooltip("Analyze the code across a range of input sizes to generate complexity graphs"));
+
         HBox inputTypeBox = new HBox(singleInputBtn, rangeInputBtn);
         inputTypeBox.getStyleClass().add("segment-box");
 
@@ -90,6 +93,10 @@ public class InputPane extends VBox {
         hardcodedInputBtn.setMaxWidth(Double.MAX_VALUE);
         HBox.setHgrow(hardcodedInputBtn, Priority.ALWAYS);
 
+        manualInputBtn.setTooltip(new Tooltip("Provide your own specific input data manually"));
+        randomInputBtn.setTooltip(new Tooltip("Automatically generate random input data based on size and type"));
+        hardcodedInputBtn.setTooltip(new Tooltip("Use input data that is already hardcoded within your Java code"));
+
         HBox singleInputBox = new HBox(manualInputBtn, randomInputBtn, hardcodedInputBtn);
         singleInputBox.getStyleClass().add("segment-box");
 
@@ -100,6 +107,7 @@ public class InputPane extends VBox {
         arrayTypeComboBox = new ComboBox<>();
         arrayTypeComboBox.getItems().addAll("Random", "Sorted", "Nearly Sorted");
         arrayTypeComboBox.setValue("Random");
+        arrayTypeComboBox.setTooltip(new Tooltip("Select the characteristics of the generated array data"));
         arrayTypeComboBox.getStyleClass().add("combo-box-dark");
         arrayTypeComboBox.setMaxWidth(Double.MAX_VALUE);
         
@@ -110,6 +118,7 @@ public class InputPane extends VBox {
         sizeLabel.getStyleClass().add("section-label-header");
         
         inputSizeField = new TextField();
+        inputSizeField.setTooltip(new Tooltip("Enter the number of elements or size of the input to generate"));
         inputSizeField.getStyleClass().add("text-field-dark");
         inputSizeField.setMaxWidth(Double.MAX_VALUE);
         inputSizeBox = new VBox(5, sizeLabel, inputSizeField);
@@ -118,16 +127,19 @@ public class InputPane extends VBox {
         Label minSizeLabel = new Label("Min Size:");
         minSizeLabel.getStyleClass().add("text-field-label");
         minSizeField = new TextField();
+        minSizeField.setTooltip(new Tooltip("Starting input size for range analysis"));
         minSizeField.getStyleClass().add("text-field-dark");
 
         Label maxSizeLabel = new Label("Max Size:");
         maxSizeLabel.getStyleClass().add("text-field-label");
         maxSizeField = new TextField();
+        maxSizeField.setTooltip(new Tooltip("Maximum input size for range analysis"));
         maxSizeField.getStyleClass().add("text-field-dark");
 
         Label stepSizeLabel = new Label("Step Size:");
         stepSizeLabel.getStyleClass().add("text-field-label");
         stepSizeField = new TextField();
+        stepSizeField.setTooltip(new Tooltip("Increment amount between input sizes in the range"));
         stepSizeField.getStyleClass().add("text-field-dark");
 
         GridPane rangeInputGrid = new GridPane();
@@ -175,14 +187,17 @@ public class InputPane extends VBox {
 
         // Bottom Buttons
         Button analyzeButton = new Button("▶ Analyze");
+        analyzeButton.setTooltip(new Tooltip("Compile, run, and benchmark the provided code"));
         analyzeButton.getStyleClass().add("analyze-button");
         analyzeButton.setOnAction(e -> { if (onAnalyze != null) onAnalyze.run(); });
 
         Button clearButton = new Button("🗑 Clear");
+        clearButton.setTooltip(new Tooltip("Clear all input, results, and graphs"));
         clearButton.getStyleClass().add("clear-button");
         clearButton.setOnAction(e -> { if (onClear != null) onClear.run(); });
 
         Button userManualButton = new Button("📖 User Manual");
+        userManualButton.setTooltip(new Tooltip("Open the user manual for instructions"));
         userManualButton.getStyleClass().add("user-manual-button");
         userManualButton.setOnAction(e -> showUserManual());
 

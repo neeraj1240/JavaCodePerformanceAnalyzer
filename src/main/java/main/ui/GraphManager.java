@@ -29,6 +29,12 @@ public class GraphManager {
     private final List<Double> executionTimes;
     private final List<Double> memoryUsages;
     private final List<Integer> inputSizes;
+    private final List<Double> throughputs;
+    private final List<Double> gcPauseTimes;
+    private final List<Double> heapAllocationRates;
+    private final List<Double> p50Latencies;
+    private final List<Double> p95Latencies;
+    private final List<Double> p99Latencies;
 
     private static final String CHART_LINE_COLOR = "#2196f3";
     private static final String CHART_BACKGROUND = "#ffffff";
@@ -60,16 +66,30 @@ public class GraphManager {
         }
     }
 
-    public GraphManager(List<Double> executionTimes, List<Double> memoryUsages, List<Integer> inputSizes) {
+    public GraphManager(List<Double> executionTimes, List<Double> memoryUsages, List<Integer> inputSizes,
+                        List<Double> throughputs, List<Double> gcPauseTimes, List<Double> heapAllocationRates,
+                        List<Double> p50Latencies, List<Double> p95Latencies, List<Double> p99Latencies) {
         this.executionTimes = executionTimes;
         this.memoryUsages = memoryUsages;
         this.inputSizes = inputSizes;
+        this.throughputs = throughputs;
+        this.gcPauseTimes = gcPauseTimes;
+        this.heapAllocationRates = heapAllocationRates;
+        this.p50Latencies = p50Latencies;
+        this.p95Latencies = p95Latencies;
+        this.p99Latencies = p99Latencies;
     }
 
     private void clearPreviousData() {
         executionTimes.clear();
         memoryUsages.clear();
         inputSizes.clear();
+        throughputs.clear();
+        gcPauseTimes.clear();
+        heapAllocationRates.clear();
+        p50Latencies.clear();
+        p95Latencies.clear();
+        p99Latencies.clear();
     }
 
     public void showTimeGraph() {
@@ -116,6 +136,70 @@ public class GraphManager {
         addProgressiveDataPoints(series, memoryUsages);
 
         showGraph(chart, series, "Memory Usage Graph");
+    }
+
+    public void showThroughputGraph() {
+        if (throughputs.isEmpty()) throw new IllegalStateException("No data available for throughput graph.");
+        NumberAxis xAxis = new NumberAxis("Input Size", 0, getMaxValue(inputSizes), calculateTickUnit(getMaxValue(inputSizes)));
+        NumberAxis yAxis = new NumberAxis("Throughput (ops/sec)", 0, getMaxValue(throughputs), calculateTickUnit(getMaxValue(throughputs)));
+        AreaChart<Number, Number> chart = createAreaChart(xAxis, yAxis, "Throughput vs Input Size");
+        chart.getStyleClass().add("embedded-time-chart");
+        if (getClass().getResource("/styles.css") != null) chart.getStylesheets().add(getClass().getResource("/styles.css").toExternalForm());
+        XYChart.Series<Number, Number> series = new XYChart.Series<>();
+        series.setName("Throughput");
+        addProgressiveDataPoints(series, throughputs);
+        showGraph(chart, series, "Throughput Graph");
+    }
+
+    public void showGcPauseTimeGraph() {
+        if (gcPauseTimes.isEmpty()) throw new IllegalStateException("No data available for GC pause time graph.");
+        NumberAxis xAxis = new NumberAxis("Input Size", 0, getMaxValue(inputSizes), calculateTickUnit(getMaxValue(inputSizes)));
+        NumberAxis yAxis = new NumberAxis("GC Pause Time (ms)", 0, getMaxValue(gcPauseTimes), calculateTickUnit(getMaxValue(gcPauseTimes)));
+        AreaChart<Number, Number> chart = createAreaChart(xAxis, yAxis, "GC Pause Time vs Input Size");
+        chart.getStyleClass().add("embedded-time-chart");
+        if (getClass().getResource("/styles.css") != null) chart.getStylesheets().add(getClass().getResource("/styles.css").toExternalForm());
+        XYChart.Series<Number, Number> series = new XYChart.Series<>();
+        series.setName("GC Pause Time");
+        addProgressiveDataPoints(series, gcPauseTimes);
+        showGraph(chart, series, "GC Pause Time Graph");
+    }
+
+    public void showHeapAllocationRateGraph() {
+        if (heapAllocationRates.isEmpty()) throw new IllegalStateException("No data available for heap allocation rate graph.");
+        NumberAxis xAxis = new NumberAxis("Input Size", 0, getMaxValue(inputSizes), calculateTickUnit(getMaxValue(inputSizes)));
+        NumberAxis yAxis = new NumberAxis("Heap Allocation Rate (MB/sec)", 0, getMaxValue(heapAllocationRates), calculateTickUnit(getMaxValue(heapAllocationRates)));
+        AreaChart<Number, Number> chart = createAreaChart(xAxis, yAxis, "Heap Allocation Rate vs Input Size");
+        chart.getStyleClass().add("embedded-memory-chart");
+        if (getClass().getResource("/styles.css") != null) chart.getStylesheets().add(getClass().getResource("/styles.css").toExternalForm());
+        XYChart.Series<Number, Number> series = new XYChart.Series<>();
+        series.setName("Heap Allocation Rate");
+        addProgressiveDataPoints(series, heapAllocationRates);
+        showGraph(chart, series, "Heap Allocation Rate Graph");
+    }
+
+    public void showLatencyGraph() {
+        if (p50Latencies.isEmpty()) throw new IllegalStateException("No data available for latency graph.");
+        double maxP99 = getMaxValue(p99Latencies);
+        NumberAxis xAxis = new NumberAxis("Input Size", 0, getMaxValue(inputSizes), calculateTickUnit(getMaxValue(inputSizes)));
+        NumberAxis yAxis = new NumberAxis("Latency (ms)", 0, maxP99, calculateTickUnit(maxP99));
+        AreaChart<Number, Number> chart = createAreaChart(xAxis, yAxis, "Latency Percentiles vs Input Size");
+        chart.getStyleClass().add("embedded-time-chart");
+        if (getClass().getResource("/styles.css") != null) chart.getStylesheets().add(getClass().getResource("/styles.css").toExternalForm());
+        
+        XYChart.Series<Number, Number> p50Series = new XYChart.Series<>();
+        p50Series.setName("p50");
+        addProgressiveDataPoints(p50Series, p50Latencies);
+        
+        XYChart.Series<Number, Number> p95Series = new XYChart.Series<>();
+        p95Series.setName("p95");
+        addProgressiveDataPoints(p95Series, p95Latencies);
+        
+        XYChart.Series<Number, Number> p99Series = new XYChart.Series<>();
+        p99Series.setName("p99");
+        addProgressiveDataPoints(p99Series, p99Latencies);
+        
+        chart.setLegendVisible(true);
+        showGraph(chart, Arrays.asList(p50Series, p95Series, p99Series), "Latency Graph");
     }
 
     public Node createEmbeddedTimeGraph() {
@@ -265,8 +349,12 @@ public class GraphManager {
     }
 
     private void showGraph(AreaChart<Number, Number> AreaChart, XYChart.Series<Number, Number> series, String title) {
+        showGraph(AreaChart, Collections.singletonList(series), title);
+    }
+
+    private void showGraph(AreaChart<Number, Number> AreaChart, List<XYChart.Series<Number, Number>> seriesList, String title) {
         AreaChart.getData().clear();
-        AreaChart.getData().add(series);
+        AreaChart.getData().addAll(seriesList);
 
         // Add interactive features
         addDataPointInteraction(AreaChart);

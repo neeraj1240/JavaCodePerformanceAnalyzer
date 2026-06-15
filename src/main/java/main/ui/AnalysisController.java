@@ -16,6 +16,12 @@ public class AnalysisController {
     private final List<Double> executionTimes = new ArrayList<>();
     private final List<Double> memoryUsages = new ArrayList<>();
     private final List<Integer> inputSizes = new ArrayList<>();
+    private final List<Double> throughputs = new ArrayList<>();
+    private final List<Double> gcPauseTimes = new ArrayList<>();
+    private final List<Double> heapAllocationRates = new ArrayList<>();
+    private final List<Double> p50Latencies = new ArrayList<>();
+    private final List<Double> p95Latencies = new ArrayList<>();
+    private final List<Double> p99Latencies = new ArrayList<>();
     private final GraphManager graphManager;
     
     private String currentInput = "";
@@ -29,7 +35,9 @@ public class AnalysisController {
         this.resultPane = resultPane;
         
         this.analyzer = new CodeAnalyzer();
-        this.graphManager = new GraphManager(executionTimes, memoryUsages, inputSizes);
+        this.graphManager = new GraphManager(executionTimes, memoryUsages, inputSizes,
+                                             throughputs, gcPauseTimes, heapAllocationRates,
+                                             p50Latencies, p95Latencies, p99Latencies);
 
         this.inputDataWindow = new DataDisplayWindow("Input Data");
         this.outputDataWindow = new DataDisplayWindow("Output Data");
@@ -59,6 +67,38 @@ public class AnalysisController {
                 UIUtils.showError("No data available for memory graph.");
             }
         });
+
+        resultPane.setOnShowThroughputGraph(() -> {
+            try {
+                graphManager.showThroughputGraph();
+            } catch (IllegalStateException ex) {
+                UIUtils.showError("No data available for throughput graph.");
+            }
+        });
+
+        resultPane.setOnShowGcPauseTimeGraph(() -> {
+            try {
+                graphManager.showGcPauseTimeGraph();
+            } catch (IllegalStateException ex) {
+                UIUtils.showError("No data available for GC pause time graph.");
+            }
+        });
+
+        resultPane.setOnShowHeapAllocationRateGraph(() -> {
+            try {
+                graphManager.showHeapAllocationRateGraph();
+            } catch (IllegalStateException ex) {
+                UIUtils.showError("No data available for heap allocation rate graph.");
+            }
+        });
+
+        resultPane.setOnShowLatencyGraph(() -> {
+            try {
+                graphManager.showLatencyGraph();
+            } catch (IllegalStateException ex) {
+                UIUtils.showError("No data available for latency graph.");
+            }
+        });
     }
 
     private void handleClear() {
@@ -70,6 +110,12 @@ public class AnalysisController {
         executionTimes.clear();
         memoryUsages.clear();
         inputSizes.clear();
+        throughputs.clear();
+        gcPauseTimes.clear();
+        heapAllocationRates.clear();
+        p50Latencies.clear();
+        p95Latencies.clear();
+        p99Latencies.clear();
         currentInput = "";
         currentOutput = "";
     }
@@ -170,6 +216,12 @@ public class AnalysisController {
                 executionTimes.add(result.getExecutionTime());
                 memoryUsages.add(result.getMemoryUsed());
                 inputSizes.add(finalInputSize);
+                throughputs.add(result.getThroughput());
+                gcPauseTimes.add(result.getGcPauseTime());
+                heapAllocationRates.add(result.getHeapAllocationRate());
+                p50Latencies.add(result.getP50Latency());
+                p95Latencies.add(result.getP95Latency());
+                p99Latencies.add(result.getP99Latency());
                 resultPane.displayResults(result);
             });
 
@@ -232,6 +284,12 @@ public class AnalysisController {
                             executionTimes.add(result.getExecutionTime());
                             memoryUsages.add(result.getMemoryUsed());
                             inputSizes.add(finalSize);
+                            throughputs.add(result.getThroughput());
+                            gcPauseTimes.add(result.getGcPauseTime());
+                            heapAllocationRates.add(result.getHeapAllocationRate());
+                            p50Latencies.add(result.getP50Latency());
+                            p95Latencies.add(result.getP95Latency());
+                            p99Latencies.add(result.getP99Latency());
                         });
                     }
                     currentInput = analyzer.getGeneratedInput();
@@ -272,5 +330,11 @@ public class AnalysisController {
         executionTimes.clear();
         memoryUsages.clear();
         inputSizes.clear();
+        throughputs.clear();
+        gcPauseTimes.clear();
+        heapAllocationRates.clear();
+        p50Latencies.clear();
+        p95Latencies.clear();
+        p99Latencies.clear();
     }
 }

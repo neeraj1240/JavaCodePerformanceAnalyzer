@@ -51,10 +51,12 @@ public class ResultPane extends VBox {
         dataButtonsBox.setAlignment(Pos.CENTER);
 
         Button showInputButton = new Button("📄 Show Input Data");
+        showInputButton.setTooltip(new Tooltip("View the actual input data that was used or generated during analysis"));
         showInputButton.getStyleClass().add("data-button-outline");
         showInputButton.setOnAction(e -> { if (onShowInputData != null) onShowInputData.run(); });
 
         Button showOutputButton = new Button("📄 Show Output Data");
+        showOutputButton.setTooltip(new Tooltip("View the standard output (stdout) and standard error (stderr) produced by your code"));
         showOutputButton.getStyleClass().add("data-button-outline");
         showOutputButton.setOnAction(e -> { if (onShowOutputData != null) onShowOutputData.run(); });
 
@@ -65,20 +67,24 @@ public class ResultPane extends VBox {
         Region spacer = new Region();
         VBox.setVgrow(spacer, Priority.ALWAYS);
 
-        getChildren().addAll(titleBox, analyzingLabel, resultArea, spacer, dataButtonsBox);
+        getChildren().addAll(titleBox, resultArea, analyzingLabel, spacer, dataButtonsBox);
     }
 
     private void setupComboBoxes() {
         timeUnitComboBox = new ComboBox<>();
+        timeUnitComboBox.setTooltip(new Tooltip("Select the unit of measurement for execution time"));
         timeUnitComboBox.getItems().addAll("Milliseconds", "Seconds", "Minutes");
         timeUnitComboBox.setValue("Milliseconds");
-        timeUnitComboBox.getStyleClass().add("combo-box-dark");
+        timeUnitComboBox.getStyleClass().add("combo-box-small");
+        timeUnitComboBox.setPrefHeight(30);
         timeUnitComboBox.setOnAction(e -> updateDisplays());
 
         memoryUnitComboBox = new ComboBox<>();
+        memoryUnitComboBox.setTooltip(new Tooltip("Select the unit of measurement for memory usage"));
         memoryUnitComboBox.getItems().addAll("Bytes", "Kilobytes", "Megabytes");
         memoryUnitComboBox.setValue("Megabytes");
-        memoryUnitComboBox.getStyleClass().add("combo-box-dark");
+        memoryUnitComboBox.getStyleClass().add("combo-box-small");
+        memoryUnitComboBox.setPrefHeight(30);
         memoryUnitComboBox.setOnAction(e -> updateDisplays());
     }
 
@@ -87,9 +93,17 @@ public class ResultPane extends VBox {
 
     private Runnable onShowTimeGraph;
     private Runnable onShowMemoryGraph;
+    private Runnable onShowThroughputGraph;
+    private Runnable onShowGcPauseTimeGraph;
+    private Runnable onShowHeapAllocationRateGraph;
+    private Runnable onShowLatencyGraph;
 
     public void setOnShowTimeGraph(Runnable onShowTimeGraph) { this.onShowTimeGraph = onShowTimeGraph; }
     public void setOnShowMemoryGraph(Runnable onShowMemoryGraph) { this.onShowMemoryGraph = onShowMemoryGraph; }
+    public void setOnShowThroughputGraph(Runnable onShowThroughputGraph) { this.onShowThroughputGraph = onShowThroughputGraph; }
+    public void setOnShowGcPauseTimeGraph(Runnable onShowGcPauseTimeGraph) { this.onShowGcPauseTimeGraph = onShowGcPauseTimeGraph; }
+    public void setOnShowHeapAllocationRateGraph(Runnable onShowHeapAllocationRateGraph) { this.onShowHeapAllocationRateGraph = onShowHeapAllocationRateGraph; }
+    public void setOnShowLatencyGraph(Runnable onShowLatencyGraph) { this.onShowLatencyGraph = onShowLatencyGraph; }
 
     public void displayResults(AnalysisResult result) {
         lastExecutionTime = result.getExecutionTime();
@@ -119,12 +133,13 @@ public class ResultPane extends VBox {
         resultArea.getChildren().clear();
 
         // Time Box
-        BorderPane timeBox = new BorderPane();
+        VBox timeBox = new VBox(10);
         timeBox.getStyleClass().add("result-box");
         
-        VBox timeLeft = new VBox(10);
         Label timeHeader = new Label("⏱ EXECUTION TIME");
         timeHeader.getStyleClass().add("result-header");
+        
+        BorderPane timeValueRow = new BorderPane();
         
         HBox timeValueBox = new HBox(5);
         timeValueBox.setAlignment(Pos.BASELINE_LEFT);
@@ -134,36 +149,32 @@ public class ResultPane extends VBox {
         timeUnitStr.getStyleClass().add("result-unit");
         timeValueBox.getChildren().addAll(timeValue, timeUnitStr);
         
+        timeValueRow.setLeft(timeValueBox);
+        timeValueRow.setRight(timeUnitComboBox);
+        BorderPane.setAlignment(timeUnitComboBox, Pos.CENTER_RIGHT);
+        
+        HBox timeBottomRow = new HBox();
+        timeBottomRow.setAlignment(Pos.CENTER_LEFT);
         Label timeSub = new Label("Average Execution Time");
         timeSub.getStyleClass().add("result-sub");
-        
-        timeLeft.getChildren().addAll(timeHeader, timeValueBox, timeSub);
-        
-        VBox timeRight = new VBox(20);
-        timeRight.setAlignment(Pos.CENTER_RIGHT);
-        
-        HBox timeUnitBox = new HBox(10);
-        timeUnitBox.setAlignment(Pos.CENTER_RIGHT);
-        Label timeUnitLabel = new Label("Time Unit");
-        timeUnitLabel.getStyleClass().add("result-unit-label");
-        timeUnitBox.getChildren().addAll(timeUnitLabel, timeUnitComboBox);
-        
-        Button showTimeGraphBtn = new Button("📈 View Time Graph");
-        showTimeGraphBtn.getStyleClass().add("data-button-outline");
+        Region timeSpacer = new Region();
+        HBox.setHgrow(timeSpacer, Priority.ALWAYS);
+        Button showTimeGraphBtn = new Button("📈 View Graph");
+        showTimeGraphBtn.setTooltip(new Tooltip("Show execution time vs input size graph"));
+        showTimeGraphBtn.getStyleClass().add("view-graph-btn");
         showTimeGraphBtn.setOnAction(e -> { if (onShowTimeGraph != null) onShowTimeGraph.run(); });
+        timeBottomRow.getChildren().addAll(timeSub, timeSpacer, showTimeGraphBtn);
         
-        timeRight.getChildren().addAll(timeUnitBox, showTimeGraphBtn);
-        
-        timeBox.setLeft(timeLeft);
-        timeBox.setRight(timeRight);
+        timeBox.getChildren().addAll(timeHeader, timeValueRow, timeBottomRow);
 
         // Memory Box
-        BorderPane memoryBox = new BorderPane();
+        VBox memoryBox = new VBox(10);
         memoryBox.getStyleClass().add("result-box");
         
-        VBox memoryLeft = new VBox(10);
         Label memoryHeader = new Label("🧠 MEMORY USAGE");
         memoryHeader.getStyleClass().add("result-header");
+        
+        BorderPane memoryValueRow = new BorderPane();
         
         HBox memoryValueBox = new HBox(5);
         memoryValueBox.setAlignment(Pos.BASELINE_LEFT);
@@ -173,35 +184,31 @@ public class ResultPane extends VBox {
         memoryUnitStr.getStyleClass().add("result-unit");
         memoryValueBox.getChildren().addAll(memoryValue, memoryUnitStr);
         
+        memoryValueRow.setLeft(memoryValueBox);
+        memoryValueRow.setRight(memoryUnitComboBox);
+        BorderPane.setAlignment(memoryUnitComboBox, Pos.CENTER_RIGHT);
+        
+        HBox memoryBottomRow = new HBox();
+        memoryBottomRow.setAlignment(Pos.CENTER_LEFT);
         Label memorySub = new Label("Average Memory Used");
         memorySub.getStyleClass().add("result-sub");
-        
-        memoryLeft.getChildren().addAll(memoryHeader, memoryValueBox, memorySub);
-        
-        VBox memoryRight = new VBox(20);
-        memoryRight.setAlignment(Pos.CENTER_RIGHT);
-        
-        HBox memoryUnitBox = new HBox(10);
-        memoryUnitBox.setAlignment(Pos.CENTER_RIGHT);
-        Label memoryUnitLabel = new Label("Memory Unit");
-        memoryUnitLabel.getStyleClass().add("result-unit-label");
-        memoryUnitBox.getChildren().addAll(memoryUnitLabel, memoryUnitComboBox);
-        
-        Button showMemoryGraphBtn = new Button("📈 View Memory Graph");
-        showMemoryGraphBtn.getStyleClass().add("data-button-outline");
+        Region memorySpacer = new Region();
+        HBox.setHgrow(memorySpacer, Priority.ALWAYS);
+        Button showMemoryGraphBtn = new Button("📈 View Graph");
+        showMemoryGraphBtn.setTooltip(new Tooltip("Show memory usage vs input size graph"));
+        showMemoryGraphBtn.getStyleClass().add("view-graph-btn");
         showMemoryGraphBtn.setOnAction(e -> { if (onShowMemoryGraph != null) onShowMemoryGraph.run(); });
+        memoryBottomRow.getChildren().addAll(memorySub, memorySpacer, showMemoryGraphBtn);
         
-        memoryRight.getChildren().addAll(memoryUnitBox, showMemoryGraphBtn);
-        
-        memoryBox.setLeft(memoryLeft);
-        memoryBox.setRight(memoryRight);
+        memoryBox.getChildren().addAll(memoryHeader, memoryValueRow, memoryBottomRow);
 
         // Throughput Box
-        BorderPane throughputBox = new BorderPane();
+        VBox throughputBox = new VBox(10);
         throughputBox.getStyleClass().add("result-box");
-        VBox throughputLeft = new VBox(10);
+        
         Label throughputHeader = new Label("🚀 THROUGHPUT");
         throughputHeader.getStyleClass().add("result-header");
+        
         HBox throughputValueBox = new HBox(5);
         throughputValueBox.setAlignment(Pos.BASELINE_LEFT);
         Label throughputValue = new Label(String.format("%.2f", lastThroughput));
@@ -209,17 +216,28 @@ public class ResultPane extends VBox {
         Label throughputUnitStr = new Label("ops/sec");
         throughputUnitStr.getStyleClass().add("result-unit");
         throughputValueBox.getChildren().addAll(throughputValue, throughputUnitStr);
+        
+        HBox throughputBottomRow = new HBox();
+        throughputBottomRow.setAlignment(Pos.CENTER_LEFT);
         Label throughputSub = new Label("Operations Per Second");
         throughputSub.getStyleClass().add("result-sub");
-        throughputLeft.getChildren().addAll(throughputHeader, throughputValueBox, throughputSub);
-        throughputBox.setLeft(throughputLeft);
+        Region throughputSpacer = new Region();
+        HBox.setHgrow(throughputSpacer, Priority.ALWAYS);
+        Button showThroughputGraphBtn = new Button("📈 View Graph");
+        showThroughputGraphBtn.setTooltip(new Tooltip("Show throughput (ops/sec) vs input size graph"));
+        showThroughputGraphBtn.getStyleClass().add("view-graph-btn");
+        showThroughputGraphBtn.setOnAction(e -> { if (onShowThroughputGraph != null) onShowThroughputGraph.run(); });
+        throughputBottomRow.getChildren().addAll(throughputSub, throughputSpacer, showThroughputGraphBtn);
+        
+        throughputBox.getChildren().addAll(throughputHeader, throughputValueBox, throughputBottomRow);
 
         // GC Pause Box
-        BorderPane gcBox = new BorderPane();
+        VBox gcBox = new VBox(10);
         gcBox.getStyleClass().add("result-box");
-        VBox gcLeft = new VBox(10);
+        
         Label gcHeader = new Label("⏱ GC PAUSE TIME");
         gcHeader.getStyleClass().add("result-header");
+        
         HBox gcValueBox = new HBox(5);
         gcValueBox.setAlignment(Pos.BASELINE_LEFT);
         Label gcValue = new Label(String.format("%.2f", lastGcPauseTime));
@@ -227,17 +245,28 @@ public class ResultPane extends VBox {
         Label gcUnitStr = new Label("ms");
         gcUnitStr.getStyleClass().add("result-unit");
         gcValueBox.getChildren().addAll(gcValue, gcUnitStr);
+        
+        HBox gcBottomRow = new HBox();
+        gcBottomRow.setAlignment(Pos.CENTER_LEFT);
         Label gcSub = new Label("Total GC Overhead");
         gcSub.getStyleClass().add("result-sub");
-        gcLeft.getChildren().addAll(gcHeader, gcValueBox, gcSub);
-        gcBox.setLeft(gcLeft);
+        Region gcSpacer = new Region();
+        HBox.setHgrow(gcSpacer, Priority.ALWAYS);
+        Button showGcGraphBtn = new Button("📈 View Graph");
+        showGcGraphBtn.setTooltip(new Tooltip("Show GC pause time vs input size graph"));
+        showGcGraphBtn.getStyleClass().add("view-graph-btn");
+        showGcGraphBtn.setOnAction(e -> { if (onShowGcPauseTimeGraph != null) onShowGcPauseTimeGraph.run(); });
+        gcBottomRow.getChildren().addAll(gcSub, gcSpacer, showGcGraphBtn);
+        
+        gcBox.getChildren().addAll(gcHeader, gcValueBox, gcBottomRow);
 
         // Heap Allocation Box
-        BorderPane heapBox = new BorderPane();
+        VBox heapBox = new VBox(10);
         heapBox.getStyleClass().add("result-box");
-        VBox heapLeft = new VBox(10);
+        
         Label heapHeader = new Label("📦 HEAP ALLOCATION RATE");
         heapHeader.getStyleClass().add("result-header");
+        
         HBox heapValueBox = new HBox(5);
         heapValueBox.setAlignment(Pos.BASELINE_LEFT);
         Label heapValue = new Label(String.format("%.2f", lastHeapAllocationRate));
@@ -245,15 +274,25 @@ public class ResultPane extends VBox {
         Label heapUnitStr = new Label("MB/sec");
         heapUnitStr.getStyleClass().add("result-unit");
         heapValueBox.getChildren().addAll(heapValue, heapUnitStr);
+        
+        HBox heapBottomRow = new HBox();
+        heapBottomRow.setAlignment(Pos.CENTER_LEFT);
         Label heapSub = new Label("Memory Allocated Per Second");
         heapSub.getStyleClass().add("result-sub");
-        heapLeft.getChildren().addAll(heapHeader, heapValueBox, heapSub);
-        heapBox.setLeft(heapLeft);
+        Region heapSpacer = new Region();
+        HBox.setHgrow(heapSpacer, Priority.ALWAYS);
+        Button showHeapGraphBtn = new Button("📈 View Graph");
+        showHeapGraphBtn.setTooltip(new Tooltip("Show heap allocation rate vs input size graph"));
+        showHeapGraphBtn.getStyleClass().add("view-graph-btn");
+        showHeapGraphBtn.setOnAction(e -> { if (onShowHeapAllocationRateGraph != null) onShowHeapAllocationRateGraph.run(); });
+        heapBottomRow.getChildren().addAll(heapSub, heapSpacer, showHeapGraphBtn);
+        
+        heapBox.getChildren().addAll(heapHeader, heapValueBox, heapBottomRow);
 
         // Latency Box
-        BorderPane latencyBox = new BorderPane();
+        VBox latencyBox = new VBox(10);
         latencyBox.getStyleClass().add("result-box");
-        VBox latencyLeft = new VBox(10);
+        
         Label latencyHeader = new Label("📊 LATENCY (SAMPLE TIME)");
         latencyHeader.getStyleClass().add("result-header");
 
@@ -301,10 +340,19 @@ public class ResultPane extends VBox {
 
         latencyValueBox.getChildren().addAll(p50Box, p95Box, p99Box);
 
+        HBox latencyBottomRow = new HBox();
+        latencyBottomRow.setAlignment(Pos.CENTER_LEFT);
         Label latencySub = new Label("Latency Percentiles");
         latencySub.getStyleClass().add("result-sub");
-        latencyLeft.getChildren().addAll(latencyHeader, latencyValueBox, latencySub);
-        latencyBox.setLeft(latencyLeft);
+        Region latencySpacer = new Region();
+        HBox.setHgrow(latencySpacer, Priority.ALWAYS);
+        Button showLatencyGraphBtn = new Button("📈 View Graph");
+        showLatencyGraphBtn.setTooltip(new Tooltip("Show latency percentiles vs input size graph"));
+        showLatencyGraphBtn.getStyleClass().add("view-graph-btn");
+        showLatencyGraphBtn.setOnAction(e -> { if (onShowLatencyGraph != null) onShowLatencyGraph.run(); });
+        latencyBottomRow.getChildren().addAll(latencySub, latencySpacer, showLatencyGraphBtn);
+        
+        latencyBox.getChildren().addAll(latencyHeader, latencyValueBox, latencyBottomRow);
 
         GridPane grid = new GridPane();
         grid.setHgap(20);
