@@ -303,7 +303,7 @@ public class ResultPane extends VBox {
         latencyHeader.getStyleClass().add("result-header");
         UIUtils.setIcon(latencyHeader, "/icons/latency.png", 18);
 
-        HBox latencyValueBox = new HBox(20);
+        HBox latencyValueBox = new HBox(12);
         latencyValueBox.setAlignment(Pos.BASELINE_LEFT);
         
         VBox p50Box = new VBox(2);
@@ -311,11 +311,11 @@ public class ResultPane extends VBox {
         p50Label.getStyleClass().add("result-sub");
         HBox p50ValBox = new HBox(2);
         p50ValBox.setAlignment(Pos.BASELINE_LEFT);
-        Label p50Val = new Label(String.format("%.2f", lastP50Latency));
+        Label p50Val = new Label();
         p50Val.getStyleClass().add("result-value");
-        p50Val.setStyle("-fx-font-size: 18px;");
         Label p50Unit = new Label("ms");
         p50Unit.getStyleClass().add("result-unit");
+        adjustLatencyFontSize(p50Val, p50Unit, lastP50Latency);
         p50ValBox.getChildren().addAll(p50Val, p50Unit);
         p50Box.getChildren().addAll(p50Label, p50ValBox);
 
@@ -324,11 +324,11 @@ public class ResultPane extends VBox {
         p95Label.getStyleClass().add("result-sub");
         HBox p95ValBox = new HBox(2);
         p95ValBox.setAlignment(Pos.BASELINE_LEFT);
-        Label p95Val = new Label(String.format("%.2f", lastP95Latency));
+        Label p95Val = new Label();
         p95Val.getStyleClass().add("result-value");
-        p95Val.setStyle("-fx-font-size: 18px;");
         Label p95Unit = new Label("ms");
         p95Unit.getStyleClass().add("result-unit");
+        adjustLatencyFontSize(p95Val, p95Unit, lastP95Latency);
         p95ValBox.getChildren().addAll(p95Val, p95Unit);
         p95Box.getChildren().addAll(p95Label, p95ValBox);
 
@@ -337,11 +337,11 @@ public class ResultPane extends VBox {
         p99Label.getStyleClass().add("result-sub");
         HBox p99ValBox = new HBox(2);
         p99ValBox.setAlignment(Pos.BASELINE_LEFT);
-        Label p99Val = new Label(String.format("%.2f", lastP99Latency));
+        Label p99Val = new Label();
         p99Val.getStyleClass().add("result-value");
-        p99Val.setStyle("-fx-font-size: 18px;");
         Label p99Unit = new Label("ms");
         p99Unit.getStyleClass().add("result-unit");
+        adjustLatencyFontSize(p99Val, p99Unit, lastP99Latency);
         p99ValBox.getChildren().addAll(p99Val, p99Unit);
         p99Box.getChildren().addAll(p99Label, p99ValBox);
 
@@ -425,6 +425,31 @@ public class ResultPane extends VBox {
             analyzingLabel.setText(message);
         } else if (analyzing) {
             analyzingLabel.setText("Analyzing...");
+        }
+    }
+
+    private void adjustLatencyFontSize(Label valLabel, Label unitLabel, double value) {
+        String formatted = String.format("%.2f", value);
+        valLabel.setText(formatted);
+        int len = formatted.length();
+        if (len <= 5) {
+            valLabel.setStyle("-fx-font-size: 18px;");
+            unitLabel.setStyle("-fx-font-size: 12px;");
+        } else if (len == 6) {
+            valLabel.setStyle("-fx-font-size: 16px;");
+            unitLabel.setStyle("-fx-font-size: 11px;");
+        } else if (len == 7) {
+            valLabel.setStyle("-fx-font-size: 14px;");
+            unitLabel.setStyle("-fx-font-size: 10px;");
+        } else if (len == 8) {
+            valLabel.setStyle("-fx-font-size: 12px;");
+            unitLabel.setStyle("-fx-font-size: 9px;");
+        } else if (len == 9) {
+            valLabel.setStyle("-fx-font-size: 11px;");
+            unitLabel.setStyle("-fx-font-size: 8px;");
+        } else {
+            valLabel.setStyle("-fx-font-size: 9px;");
+            unitLabel.setStyle("-fx-font-size: 8px;");
         }
     }
 }
