@@ -37,8 +37,9 @@ public class InputPane extends VBox {
 
         HBox titleBox = new HBox(10);
         titleBox.setAlignment(Pos.CENTER_LEFT);
-        Label titleLabel = new Label("</> CODE INPUT");
+        Label titleLabel = new Label("CODE INPUT");
         titleLabel.getStyleClass().add("title-label");
+        UIUtils.setIcon(titleLabel, "/icons/code_input.png", 20);
         titleBox.getChildren().add(titleLabel);
 
         codeInputArea = new TextArea();

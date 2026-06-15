@@ -33,8 +33,9 @@ public class ResultPane extends VBox {
 
         HBox titleBox = new HBox(10);
         titleBox.setAlignment(Pos.CENTER_LEFT);
-        Label resultTitle = new Label("📈 ANALYSIS RESULTS");
+        Label resultTitle = new Label("ANALYSIS RESULTS");
         resultTitle.getStyleClass().add("title-label");
+        UIUtils.setIcon(resultTitle, "/icons/analysis_result.png", 20);
         titleBox.getChildren().add(resultTitle);
 
         resultArea = new VBox(20);
@@ -136,8 +137,9 @@ public class ResultPane extends VBox {
         VBox timeBox = new VBox(10);
         timeBox.getStyleClass().add("result-box");
         
-        Label timeHeader = new Label("⏱ EXECUTION TIME");
+        Label timeHeader = new Label("EXECUTION TIME");
         timeHeader.getStyleClass().add("result-header");
+        UIUtils.setIcon(timeHeader, "/icons/execution_time.png", 18);
         
         BorderPane timeValueRow = new BorderPane();
         
@@ -171,8 +173,9 @@ public class ResultPane extends VBox {
         VBox memoryBox = new VBox(10);
         memoryBox.getStyleClass().add("result-box");
         
-        Label memoryHeader = new Label("🧠 MEMORY USAGE");
+        Label memoryHeader = new Label("MEMORY USAGE");
         memoryHeader.getStyleClass().add("result-header");
+        UIUtils.setIcon(memoryHeader, "/icons/memory_usage.png", 18);
         
         BorderPane memoryValueRow = new BorderPane();
         
@@ -206,8 +209,9 @@ public class ResultPane extends VBox {
         VBox throughputBox = new VBox(10);
         throughputBox.getStyleClass().add("result-box");
         
-        Label throughputHeader = new Label("🚀 THROUGHPUT");
+        Label throughputHeader = new Label("THROUGHPUT");
         throughputHeader.getStyleClass().add("result-header");
+        UIUtils.setIcon(throughputHeader, "/icons/throughput.png", 18);
         
         HBox throughputValueBox = new HBox(5);
         throughputValueBox.setAlignment(Pos.BASELINE_LEFT);
@@ -235,8 +239,9 @@ public class ResultPane extends VBox {
         VBox gcBox = new VBox(10);
         gcBox.getStyleClass().add("result-box");
         
-        Label gcHeader = new Label("⏱ GC PAUSE TIME");
+        Label gcHeader = new Label("GC PAUSE TIME");
         gcHeader.getStyleClass().add("result-header");
+        UIUtils.setIcon(gcHeader, "/icons/gc_pause_time.png", 18);
         
         HBox gcValueBox = new HBox(5);
         gcValueBox.setAlignment(Pos.BASELINE_LEFT);
@@ -264,8 +269,9 @@ public class ResultPane extends VBox {
         VBox heapBox = new VBox(10);
         heapBox.getStyleClass().add("result-box");
         
-        Label heapHeader = new Label("📦 HEAP ALLOCATION RATE");
+        Label heapHeader = new Label("HEAP ALLOCATION RATE");
         heapHeader.getStyleClass().add("result-header");
+        UIUtils.setIcon(heapHeader, "/icons/heap.png", 18);
         
         HBox heapValueBox = new HBox(5);
         heapValueBox.setAlignment(Pos.BASELINE_LEFT);
@@ -293,8 +299,9 @@ public class ResultPane extends VBox {
         VBox latencyBox = new VBox(10);
         latencyBox.getStyleClass().add("result-box");
         
-        Label latencyHeader = new Label("📊 LATENCY (SAMPLE TIME)");
+        Label latencyHeader = new Label("LATENCY (SAMPLE TIME)");
         latencyHeader.getStyleClass().add("result-header");
+        UIUtils.setIcon(latencyHeader, "/icons/latency.png", 18);
 
         HBox latencyValueBox = new HBox(20);
         latencyValueBox.setAlignment(Pos.BASELINE_LEFT);
