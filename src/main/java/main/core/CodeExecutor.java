@@ -112,13 +112,11 @@ public class CodeExecutor {
         Thread inputThread = new Thread(() -> {
             try (BufferedWriter writer = new BufferedWriter(
                     new OutputStreamWriter(runProcess.getOutputStream()))) {
-                String[] inputLines = input.split("\n");
-                for (String line : inputLines) {
-                    writer.write(line);
+                writer.write(input);
+                if (!input.endsWith("\n")) {
                     writer.newLine();
-                    writer.flush();
-                    Thread.sleep(10);
                 }
+                writer.flush();
             } catch (Exception e) {
                 e.printStackTrace();
             }
