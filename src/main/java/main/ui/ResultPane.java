@@ -6,10 +6,17 @@ import javafx.scene.Node;
 import javafx.scene.control.*;
 import javafx.scene.layout.*;
 import main.core.AnalysisResult;
+import javafx.animation.Animation;
+import javafx.animation.ScaleTransition;
+import javafx.util.Duration;
+import javafx.scene.shape.Circle;
+import javafx.scene.paint.Color;
 
 public class ResultPane extends VBox {
     private VBox resultArea;
+    private HBox analyzingContainer;
     private Label analyzingLabel;
+    private ScaleTransition[] dotTransitions = new ScaleTransition[3];
     private ComboBox<String> timeUnitComboBox;
     private ComboBox<String> memoryUnitComboBox;
 
@@ -43,8 +50,24 @@ public class ResultPane extends VBox {
 
         analyzingLabel = new Label("Analyzing...");
         analyzingLabel.getStyleClass().add("analyzing-label");
-        analyzingLabel.setVisible(false);
-        analyzingLabel.setManaged(false);
+
+        HBox dotsBox = new HBox(6);
+        dotsBox.setAlignment(Pos.CENTER);
+        for (int i = 0; i < 3; i++) {
+            Circle dot = new Circle(4, Color.web("#58a6ff"));
+            dotTransitions[i] = new ScaleTransition(Duration.millis(500), dot);
+            dotTransitions[i].setByX(0.5);
+            dotTransitions[i].setByY(0.5);
+            dotTransitions[i].setAutoReverse(true);
+            dotTransitions[i].setCycleCount(Animation.INDEFINITE);
+            dotTransitions[i].setDelay(Duration.millis(i * 150));
+            dotsBox.getChildren().add(dot);
+        }
+
+        analyzingContainer = new HBox(15, dotsBox, analyzingLabel);
+        analyzingContainer.setAlignment(Pos.CENTER);
+        analyzingContainer.setVisible(false);
+        analyzingContainer.setManaged(false);
 
         setupComboBoxes();
 
@@ -68,7 +91,7 @@ public class ResultPane extends VBox {
         Region spacer = new Region();
         VBox.setVgrow(spacer, Priority.ALWAYS);
 
-        getChildren().addAll(titleBox, resultArea, analyzingLabel, spacer, dataButtonsBox);
+        getChildren().addAll(titleBox, resultArea, analyzingContainer, spacer, dataButtonsBox);
     }
 
     private void setupComboBoxes() {
@@ -419,12 +442,22 @@ public class ResultPane extends VBox {
     }
 
     public void setAnalyzing(boolean analyzing, String message) {
-        analyzingLabel.setVisible(analyzing);
-        analyzingLabel.setManaged(analyzing);
+        analyzingContainer.setVisible(analyzing);
+        analyzingContainer.setManaged(analyzing);
         if (analyzing && message != null) {
             analyzingLabel.setText(message);
         } else if (analyzing) {
             analyzingLabel.setText("Analyzing...");
+        }
+        
+        for (ScaleTransition st : dotTransitions) {
+            if (st != null) {
+                if (analyzing) {
+                    st.play();
+                } else {
+                    st.pause();
+                }
+            }
         }
     }
 

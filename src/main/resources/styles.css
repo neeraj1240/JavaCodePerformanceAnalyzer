@@ -95,7 +95,7 @@
     -fx-font-family: "Segoe UI", sans-serif;
 }
 
-/* Code Input Area */
+/* Code Input Area (Legacy/Manual) */
 .code-input {
     -fx-background-color: #0d1117;
     -fx-control-inner-background: #0d1117;
@@ -108,6 +108,94 @@
 }
 .code-input:focused {
     -fx-border-color: #58a6ff;
+}
+
+/* Code Editor Area */
+.code-editor-container {
+    -fx-background-color: #0d1117;
+    -fx-border-color: #30363d;
+    -fx-border-radius: 8px;
+    -fx-background-radius: 8px;
+    -fx-padding: 0;
+}
+
+.code-editor-container:focus-within {
+    -fx-border-color: #484f58; /* Subtle gray instead of neon blue */
+}
+
+.code-editor-hbox {
+    -fx-padding: 0;
+}
+
+.code-editor-text-area {
+    -fx-background-color: #0d1117;
+    -fx-control-inner-background: #0d1117;
+    -fx-text-fill: #c9d1d9;
+    -fx-prompt-text-fill: #8b949e;
+    -fx-font-family: "Consolas", monospace;
+    -fx-font-size: 14px;
+    -fx-border-width: 0;
+    -fx-background-insets: 0;
+    -fx-padding: 10px;
+}
+
+.code-editor-text-area .viewport,
+.code-editor-text-area .content {
+    -fx-background-color: #0d1117;
+}
+
+.code-editor-text-area:focused {
+    -fx-background-color: #0d1117;
+}
+
+.code-editor-line-numbers {
+    -fx-background-color: #0d1117;
+    -fx-control-inner-background: #0d1117;
+    -fx-text-fill: #8b949e;
+    -fx-font-family: "Consolas", monospace;
+    -fx-font-size: 14px;
+    -fx-border-color: transparent #30363d transparent transparent;
+    -fx-border-width: 1px;
+    -fx-padding: 10px 5px 10px 0;
+    -fx-alignment: top-right;
+}
+
+.code-editor-line-numbers .viewport,
+.code-editor-line-numbers .content,
+.code-editor-line-numbers .corner,
+.code-editor-text-area .corner {
+    -fx-background-color: #0d1117;
+}
+
+.code-editor-line-numbers:focused {
+    -fx-background-color: #0d1117;
+}
+
+.code-editor-line-numbers .scroll-bar:horizontal,
+.code-editor-line-numbers .scroll-bar:vertical {
+    -fx-opacity: 0;
+    -fx-padding: 0;
+    -fx-pref-width: 0;
+    -fx-pref-height: 0;
+    -fx-max-width: 0;
+    -fx-max-height: 0;
+}
+
+/* Fullscreen Button */
+.fullscreen-btn {
+    -fx-background-color: transparent;
+    -fx-padding: 5px;
+    -fx-cursor: hand;
+    -fx-background-radius: 4px;
+}
+.fullscreen-btn:hover {
+    -fx-background-color: #21262d;
+}
+.fullscreen-btn SVGPath {
+    -fx-fill: #8b949e;
+}
+.fullscreen-btn:hover SVGPath {
+    -fx-fill: #c9d1d9;
 }
 
 /* Section Labels */

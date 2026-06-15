@@ -6,7 +6,7 @@ import javafx.scene.control.*;
 import javafx.scene.layout.*;
 
 public class InputPane extends VBox {
-    private TextArea codeInputArea;
+    private CodeEditorPane codeEditorPane;
     private ToggleButton singleInputBtn;
     private ToggleButton rangeInputBtn;
     
@@ -42,10 +42,8 @@ public class InputPane extends VBox {
         UIUtils.setIcon(titleLabel, "/icons/code_input.png", 20);
         titleBox.getChildren().add(titleLabel);
 
-        codeInputArea = new TextArea();
-        codeInputArea.getStyleClass().add("code-input");
-        codeInputArea.setWrapText(true);
-        codeInputArea.setPrefRowCount(15);
+        codeEditorPane = new CodeEditorPane();
+        VBox.setVgrow(codeEditorPane, Priority.ALWAYS);
 
         // Input Mode
         Label inputModeLabel = new Label("INPUT MODE");
@@ -219,7 +217,7 @@ public class InputPane extends VBox {
 
         getChildren().addAll(
                 titleBox,
-                codeInputArea,
+                codeEditorPane,
                 contentBox,
                 new Region(), // Spacer
                 bottomBox
@@ -278,8 +276,8 @@ public class InputPane extends VBox {
     public void setOnAnalyze(Runnable onAnalyze) { this.onAnalyze = onAnalyze; }
     public void setOnClear(Runnable onClear) { this.onClear = onClear; }
 
-    public String getCode() { return codeInputArea.getText(); }
-    public void clearCode() { codeInputArea.clear(); }
+    public String getCode() { return codeEditorPane.getCodeInputArea().getText(); }
+    public void clearCode() { codeEditorPane.getCodeInputArea().clear(); }
 
     public boolean isRangeInput() { return rangeInputBtn.isSelected(); }
     public boolean isManualInput() { return manualInputBtn.isSelected(); }
