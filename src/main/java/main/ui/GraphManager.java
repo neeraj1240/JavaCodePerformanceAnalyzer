@@ -293,8 +293,6 @@ public class GraphManager {
     }
 
     private void addProgressiveDataPoints(XYChart.Series<Number, Number> series, List<Double> values) {
-        series.getData().add(new XYChart.Data<>(0, 0));
-
         List<DataPoint> dataPoints = new ArrayList<>();
         for (int i = 0; i < inputSizes.size(); i++) {
             dataPoints.add(new DataPoint(inputSizes.get(i), values.get(i)));
@@ -304,31 +302,6 @@ public class GraphManager {
         for (DataPoint dp : dataPoints) {
             series.getData().add(new XYChart.Data<>(dp.inputSize, dp.value));
         }
-
-        List<XYChart.Data<Number, Number>> interpolatedPoints = new ArrayList<>();
-        for (int i = 0; i < series.getData().size() - 1; i++) {
-            XYChart.Data<Number, Number> current = series.getData().get(i);
-            XYChart.Data<Number, Number> next = series.getData().get(i + 1);
-
-            double gap = next.getXValue().doubleValue() - current.getXValue().doubleValue();
-            if (gap > 50) {
-                double steps = Math.min(10, gap / 50);
-                for (int j = 1; j < steps; j++) {
-                    double x = current.getXValue().doubleValue() + (gap * j / steps);
-                    double y = interpolateValue(
-                            current.getXValue().doubleValue(), current.getYValue().doubleValue(),
-                            next.getXValue().doubleValue(), next.getYValue().doubleValue(),
-                            x
-                    );
-                    interpolatedPoints.add(new XYChart.Data<>(x, y));
-                }
-            }
-        }
-
-        series.getData().addAll(interpolatedPoints);
-
-        series.getData().sort((a, b) ->
-                Double.compare(a.getXValue().doubleValue(), b.getXValue().doubleValue()));
     }
 
     private double interpolateValue(double x1, double y1, double x2, double y2, double x) {
