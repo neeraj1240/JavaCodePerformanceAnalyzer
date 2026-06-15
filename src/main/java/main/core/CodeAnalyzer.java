@@ -85,29 +85,20 @@ public class CodeAnalyzer {
                     for (int i = 0; i < sizesStr.length; i++) {
                         sizes[i] = Integer.parseInt(sizesStr[i]);
                     }
-                    List<double[]> measurements = new ArrayList<>();
+                    List<AnalysisResult> measurements = new ArrayList<>();
                     for (int size : sizes) {
                         String generatedInput = inputGenerator.generateInputForType(inputType, size);
                         inputGenerator.setGeneratedInput(generatedInput);
                         System.gc();
                         Thread.sleep(100);
                         CodeExecutor.PerformanceMetrics metrics = codeExecutor.executeAndMeasure(tempDir, className, generatedInput);
-                        measurements.add(new double[]{size, metrics.executionTime, metrics.memoryUsed});
+                        measurements.add(new AnalysisResult(metrics.executionTime, metrics.memoryUsed, size,
+                                metrics.throughput, metrics.gcPauseTime, metrics.heapAllocationRate,
+                                metrics.p50Latency, metrics.p95Latency, metrics.p99Latency));
                     }
 
-                    double[] sizesArr = new double[measurements.size()];
-                    double[] times = new double[measurements.size()];
-                    double[] memories = new double[measurements.size()];
-                    for (int i = 0; i < measurements.size(); i++) {
-                        sizesArr[i] = measurements.get(i)[0];
-                        times[i] = measurements.get(i)[1];
-                        memories[i] = measurements.get(i)[2];
-                    }
-                    // Return result with last measurement and its size
-                    double lastAvgTime = times[times.length - 1];
-                    double lastAvgMemory = memories[memories.length - 1];
-                    int lastSize = (int)sizesArr[sizesArr.length - 1];
-                    return new AnalysisResult(lastAvgTime, lastAvgMemory, lastSize);
+                    // Return result with last measurement
+                    return measurements.get(measurements.size() - 1);
                 } else {
                     throw new Exception("Invalid input format for detailed analysis");
                 }
@@ -132,7 +123,9 @@ public class CodeAnalyzer {
                 System.gc();
                 Thread.sleep(100);
                 CodeExecutor.PerformanceMetrics metrics = codeExecutor.executeAndMeasure(tempDir, className, input);
-                return new AnalysisResult(metrics.executionTime, metrics.memoryUsed, inputSize);
+                return new AnalysisResult(metrics.executionTime, metrics.memoryUsed, inputSize,
+                        metrics.throughput, metrics.gcPauseTime, metrics.heapAllocationRate,
+                        metrics.p50Latency, metrics.p95Latency, metrics.p99Latency);
             }
         } finally {
             codeCompiler.deleteDirectory(tempDir);

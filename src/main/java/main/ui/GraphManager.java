@@ -276,6 +276,7 @@ public class GraphManager {
         addZoomCapability(AreaChart);
 
         Stage graphStage = setupGraphStage(AreaChart, controlPanel, title);
+        applyTheme(AreaChart, "contrast");
         graphStage.show();
         graphStage.toFront();
     }
@@ -382,22 +383,21 @@ public class GraphManager {
     private VBox createControlPanel(AreaChart<Number, Number> chart) {
         VBox controlPanel = new VBox(10);
         controlPanel.setPadding(new Insets(10));
-        controlPanel.setStyle("-fx-background-color: #f0f0f0; -fx-padding: 10;");
+        controlPanel.setStyle("-fx-background-color: #1a1e29; -fx-padding: 10;");
 
-        // Theme selector
-        ComboBox<String> themeSelector = new ComboBox<>();
-        themeSelector.getItems().addAll("Light", "Dark", "Contrast");
-        themeSelector.setValue("Dark");
-        themeSelector.setOnAction(e -> applyTheme(chart, themeSelector.getValue().toLowerCase()));
+        Label controlsLabel = new Label("Controls:");
+        controlsLabel.setStyle("-fx-text-fill: white;");
 
         // Toggle data points
         CheckBox showDataPoints = new CheckBox("Show Data Points");
         showDataPoints.setSelected(true);
+        showDataPoints.setStyle("-fx-text-fill: white;");
         showDataPoints.setOnAction(e -> toggleDataPoints(chart, showDataPoints.isSelected()));
 
         // Toggle grid lines
         CheckBox showGrid = new CheckBox("Show Grid Lines");
         showGrid.setSelected(true);
+        showGrid.setStyle("-fx-text-fill: white;");
         showGrid.setOnAction(e -> toggleGridLines(chart, showGrid.isSelected()));
 
         // Export button
@@ -409,8 +409,7 @@ public class GraphManager {
         resetZoomButton.setOnAction(e -> resetZoom(chart));
 
         controlPanel.getChildren().addAll(
-                new Label("Controls:"),
-                themeSelector,
+                controlsLabel,
                 showDataPoints,
                 showGrid,
                 exportButton,
@@ -426,10 +425,14 @@ public class GraphManager {
 
         HBox root = new HBox(10);
         root.setPadding(new Insets(10));
+        root.setStyle("-fx-background-color: #0b0f19;");
         root.getChildren().addAll(AreaChart, controlPanel);
         HBox.setHgrow(AreaChart, Priority.ALWAYS);
 
         Scene scene = new Scene(root);
+        if (getClass().getResource("/styles.css") != null) {
+            scene.getStylesheets().add(getClass().getResource("/styles.css").toExternalForm());
+        }
         graphStage.setScene(scene);
         graphStage.setMinWidth(1000);
         graphStage.setMinHeight(600);

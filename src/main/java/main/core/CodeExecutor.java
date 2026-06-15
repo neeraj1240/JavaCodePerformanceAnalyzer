@@ -22,10 +22,24 @@ public class CodeExecutor {
     public static class PerformanceMetrics {
         public final double executionTime;
         public final double memoryUsed;
+        public final double throughput;
+        public final double gcPauseTime;
+        public final double heapAllocationRate;
+        public final double p50Latency;
+        public final double p95Latency;
+        public final double p99Latency;
 
-        public PerformanceMetrics(double executionTime, double memoryUsed) {
+        public PerformanceMetrics(double executionTime, double memoryUsed, double throughput,
+                                  double gcPauseTime, double heapAllocationRate,
+                                  double p50Latency, double p95Latency, double p99Latency) {
             this.executionTime = executionTime;
             this.memoryUsed = memoryUsed;
+            this.throughput = throughput;
+            this.gcPauseTime = gcPauseTime;
+            this.heapAllocationRate = heapAllocationRate;
+            this.p50Latency = p50Latency;
+            this.p95Latency = p95Latency;
+            this.p99Latency = p99Latency;
         }
     }
 
@@ -36,7 +50,7 @@ public class CodeExecutor {
     }
 
     @State(Scope.Benchmark)
-    @BenchmarkMode(Mode.AverageTime)
+    @BenchmarkMode({Mode.AverageTime, Mode.Throughput, Mode.SampleTime})
     @OutputTimeUnit(TimeUnit.MILLISECONDS)
     public static class UserCodeBenchmark {
 
@@ -175,18 +189,41 @@ public class CodeExecutor {
                 throw new Exception("JMH benchmarking failed to produce results.");
             }
 
-            RunResult result = results.iterator().next();
-            
-            // Average time per operation in milliseconds (as configured by @OutputTimeUnit)
-            double timeMs = result.getPrimaryResult().getScore();
-            
-            // Extract memory allocated (bytes per operation)
+            double timeMs = 0;
             double memoryUsedBytes = 0;
-            if (result.getSecondaryResults().containsKey("gc.alloc.rate.norm")) {
-                memoryUsedBytes = result.getSecondaryResults().get("gc.alloc.rate.norm").getScore();
+            double throughputOpsPerSec = 0;
+            double gcPauseTimeMs = 0;
+            double heapAllocationRateMbPerSec = 0;
+            double p50LatencyMs = 0;
+            double p95LatencyMs = 0;
+            double p99LatencyMs = 0;
+
+            for (RunResult result : results) {
+                String mode = result.getParams().getMode().name();
+                if (mode.equals("AverageTime")) {
+                    timeMs = result.getPrimaryResult().getScore();
+                    if (result.getSecondaryResults().containsKey("gc.alloc.rate.norm")) {
+                        memoryUsedBytes = result.getSecondaryResults().get("gc.alloc.rate.norm").getScore();
+                    }
+                    if (result.getSecondaryResults().containsKey("gc.alloc.rate")) {
+                        heapAllocationRateMbPerSec = result.getSecondaryResults().get("gc.alloc.rate").getScore();
+                    }
+                    if (result.getSecondaryResults().containsKey("gc.time")) {
+                        gcPauseTimeMs = result.getSecondaryResults().get("gc.time").getScore();
+                    }
+                } else if (mode.equals("Throughput")) {
+                    throughputOpsPerSec = result.getPrimaryResult().getScore();
+                } else if (mode.equals("SampleTime")) {
+                    org.openjdk.jmh.util.Statistics stats = result.getPrimaryResult().getStatistics();
+                    p50LatencyMs = stats.getPercentile(50.0);
+                    p95LatencyMs = stats.getPercentile(95.0);
+                    p99LatencyMs = stats.getPercentile(99.0);
+                }
             }
 
-            return new PerformanceMetrics(timeMs, memoryUsedBytes);
+            return new PerformanceMetrics(timeMs, memoryUsedBytes, throughputOpsPerSec, gcPauseTimeMs,
+                    heapAllocationRateMbPerSec, p50LatencyMs, p95LatencyMs, p99LatencyMs);
+
 
         } finally {
             Files.deleteIfExists(tempInputFile);
