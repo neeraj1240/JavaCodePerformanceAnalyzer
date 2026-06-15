@@ -1,153 +1,97 @@
-# Java Code Performance Analyzer Tool
+# AnalyzePrograms
 
-A sophisticated desktop application that analyzes Java code performance metrics, including execution time and Memory usage. Features automated test data generation with customizable input sizes up to 100,000 elements, eliminating the need for manual test data creation.
+JavaFX desktop app for benchmarking small Java programs.
 
-## Table of Contents
+Paste Java code, choose input, run it, and inspect the numbers. The app compiles the pasted code with `javac`, runs it once to capture output, then benchmarks the program's `main` method with JMH.
 
-- [Overview](#overview)
-- [Main User Interface](#main-user-interface)
-- [Input Types](#input-types)
-  - [Single Input](#single-input)
-  - [Range Input](#range-input)
-  - [Manual Input](#manual-input)
-  - [Random Input](#random-input)
-  - [Hardcoded Input](#hardcoded-input)
-- [Graphs and Visualizations](#graphs-and-visualizations)
-  - [Execution Time Graph](#execution-time-graph)
-  - [Memory Usage Graph](#memory-usage-graph)
-  - [Combined Execution Time & Memory Usage Results](#combined-execution-time--memory-usage-results)
-- [Data Display](#data-display)
-  - [Input Data](#input-data)
-  - [Output Data](#output-data)
-- [User Manual](#user-manual)
-- [Installation](#installation)
-- [Usage](#usage)
+It does not prove Big-O. It gives measurements so you can compare how the same program behaves as input grows.
 
-## Overview
+![Main menu](images/Main_Menu.png)
 
-The Java Code Performance Analyzer Tool uses Java and JavaFX to evaluate code efficiency. It generates performance graphs from various input types and displays key metrics such as execution time and memory usage.
+## What It Measures
 
-## Main User Interface
+- Execution time.
+- Memory usage.
+- Throughput: operations per second.
+- GC pause time.
+- Heap allocation rate.
+- Latency percentiles: p50, p95, and p99.
 
-The main UI features:
-- **Code Input Panel:** Paste or write code to be analyzed.
-- **Input Options:** Select input type and adjust parameters.
-- **Results Panel:** View performance metrics including execution time, memory usage, time and space complexity.
-- **Graph Buttons:** Launch dedicated graph windows for further analysis.
+![Analysis results](images/result.png)
 
-![Main UI](images/mainUI.png)
+## Code Requirements
 
-## Input Types
+The pasted program should:
 
-The tool provides several input methods:
+- Use a `public class`.
+- Use `public static void main(String[] args)`.
+- Avoid a `package` declaration. The runner expects the public class directly on the temporary classpath.
+- Print something with `System.out.print`, `System.out.println`, `System.out.printf`, or the same methods on `System.err`. The UI uses this to make output capture explicit.
 
-![Input Types](images/inputType.png)
+The app is best for self-contained algorithm snippets, not full projects with build tools, external libraries, files, networking, or long-running services.
+
+## Input Modes
+
+![Code input](images/code_input.png)
 
 ### Single Input
-Provide a single dataset to test your program quickly.
 
-### Range Input
-Specify a range with:
-- **Minimum Input Size**
-- **Maximum Input Size**
-- **Step Size**
+Runs one benchmark point.
 
-### Manual Input
-Enter custom test cases directly.
+Data sources:
 
-### Random Input
-Generate random test data automatically based on your configuration.
+- Manual Input: paste the exact stdin your program expects.
+- Random Input: generate stdin from simple `Scanner` patterns.
+- Hardcoded Input: use data already inside the code. This mode rejects code that still reads from `Scanner`.
 
-### Hardcoded Input
-Uses predefined test data embedded in the code for consistent benchmarking.
+### Input Range
 
-## Graphs and Visualizations
+Runs the same program across multiple generated input sizes. This is the mode that enables graphs.
 
-Visualizations help you interpret performance trends:
+You provide:
 
-### Execution Time Graph
-Displays the program's execution time across different input sizes.
+- Min size.
+- Max size.
+- Step size.
+- Array type: random, sorted, or nearly sorted.
 
-![Execution Time Graph](images/executionGraph.png)
+The max generated size is `100000` (FOR NOW).
 
-### Memory Usage Graph
-Visualizes the memory usage trend.
+### Random Input Rules
 
-![Memory Usage Graph](images/memoryGraph.png)
+Random generation is heuristic. It handles simple `Scanner` programs, including:
 
-### Combined Execution Time & Memory Usage Results
-A summary view of execution time and memory usage.
+- `nextInt()` / `nextDouble()` numeric input.
+- Common array-style input where the first number is the size.
+- Simple matrix input.
+- Single `nextLine()` string input.
 
-![Combined Results](images/executionTimeMemoryUsageResult.png)
+For custom formats, use Manual Input. Do not fight the generator.
 
-## Data Display
+## Input And Output Windows
 
-### Input Data
-View the test data used for analysis in a dedicated window.
+The app stores the exact input used for the latest run and the output captured from the verification run.
 
-![Input Data](images/inputData.png)
+![Input data](images/input_data.png)
 
-### Output Data
-Review your program's output after analysis.
+![Output data](images/output_data.png)
 
-![Output Data](images/outputData.png)
+## Graphs
 
-## User Manual
+Graphs are only available after Input Range analysis, because one input size is not a trend.
 
-Detailed usage instructions and guidelines can be found in the integrated user manual. The manual explains:
-- Expected input format
-- Main method requirements
-- Performance analysis techniques
-- Best practices for accurate results
+Each graph window can show/hide data points, show/hide grid lines, export CSV data, reset zoom, pan, and zoom.
 
-![User Manual](images/userManual.png)
+![Execution time graph](images/execution_time_graph.png)
 
-## Installation
+![GC pause time graph](images/gc_pause_time_graph.png)
 
-1. **Clone the Repository:**
+![Heap allocation rate graph](images/heap_allocation_rate_graph.png)
 
-   ```sh
-   git clone https://github.com/neeraj1240/JavaCodePerformanceAnalyzer.git
-   ```
+![Latency percentile graph](images/latencies_percetile_graph.png)
 
-2. **Navigate to the Project Directory:**
+## FAQ Window
 
-   ```sh
-   cd JavaCodePerformanceAnalyzer
-   ```
+The in-app FAQ explains the supported input formats and common failure cases.
 
-3. **Build the Project:**
-
-   If using Maven (as indicated by the `pom.xml` file), run:
-
-   ```sh
-   mvn clean install
-   ```
-
-4. **Run the Application:**
-
-   If you are using the command line:
-
-   ```sh
-   java -cp target/your-artifact.jar main.ui.CodeAnalyzerUI
-   ```
-
-   Alternatively, you can run the application from within your IDE (e.g., Visual Studio Code).
-
-## Usage
-
-1. **Enter Code:**
-   - Use the left panel to type or paste your Java code.
-  
-2. **Select Input Type:**
-   - Choose from Single, Range, Manual, Random, or Hardcoded inputs.
-
-3. **Start Analysis:**
-   - Click "Analyze" to run the performance metrics.
-  
-4. **View Graphs and Results:**
-   - Use "Show Time Graph" and "Show Memory Graph" buttons to view detailed visualizations.
-   - Review the numeric results displayed alongside the graphs.
-
-5. **Use the User Manual:**
-   - Access the user manual directly from the UI for further guidance.
+![FAQ](images/FAQ.png)
