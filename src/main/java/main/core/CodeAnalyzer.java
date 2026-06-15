@@ -36,7 +36,43 @@ public class CodeAnalyzer {
                 .find();
     }
 
+    public boolean hasOutputStatement(String code) {
+        return Pattern.compile("System\\s*\\.\\s*(?:out|err)\\s*\\.\\s*(?:print|println|printf)\\s*\\(")
+                .matcher(stripComments(code))
+                .find();
+    }
+
+    public boolean hasScannerInput(String code) {
+        String codeWithoutComments = stripComments(code);
+        return codeWithoutComments.contains("Scanner") &&
+                Pattern.compile("\\.\\s*next(?:Int|Double|Line|Long|Float|Boolean|Byte|Short)?\\s*\\(")
+                        .matcher(codeWithoutComments)
+                        .find();
+    }
+
+    public boolean readsStandardInput(String code) {
+        String codeWithoutComments = stripComments(code);
+        return hasScannerInput(codeWithoutComments) ||
+                codeWithoutComments.contains("System.in") ||
+                codeWithoutComments.contains("InputStreamReader");
+    }
+
+    public boolean supportsGeneratedInput(String code) {
+        String codeWithoutComments = stripComments(code);
+        if (!hasScannerInput(codeWithoutComments)) {
+            return false;
+        }
+
+        return inputGenerator.hasSingleStringInput(codeWithoutComments) ||
+                codeWithoutComments.contains("matrix") ||
+                codeWithoutComments.contains("[][]") ||
+                Pattern.compile("\\.\\s*next(?:Int|Double)\\s*\\(")
+                        .matcher(codeWithoutComments)
+                        .find();
+    }
+
     public boolean hasHardcodedInput(String code) {
+        String codeWithoutComments = stripComments(code);
         String[] patterns = {
                 "\\{\\s*\\d+\\s*,.*?\\}",
                 "new\\s+(?:int|String|double|float|char)\\s*\\[\\s*\\]\\s*=\\s*\\{[^}]+\\}",
@@ -49,12 +85,19 @@ public class CodeAnalyzer {
         };
 
         for (String pattern : patterns) {
-            if (Pattern.compile(pattern).matcher(code).find()) {
+            if (Pattern.compile(pattern).matcher(codeWithoutComments).find()) {
                 return true;
             }
         }
 
-        return code.contains("int[] arr") && code.contains("{") && code.contains("}");
+        return codeWithoutComments.contains("int[] arr") &&
+                codeWithoutComments.contains("{") &&
+                codeWithoutComments.contains("}");
+    }
+
+    private String stripComments(String code) {
+        return code.replaceAll("(?s)/\\*.*?\\*/", "")
+                .replaceAll("(?m)//.*$", "");
     }
 
     public AnalysisResult analyzeCode(String code, String input) throws Exception {

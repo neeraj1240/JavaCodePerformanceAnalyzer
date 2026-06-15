@@ -133,6 +133,11 @@ public class AnalysisController {
             return;
         }
 
+        if (!analyzer.hasOutputStatement(code)) {
+            UIUtils.showError("No print statement found in your code.\n\nAdd System.out.print(), System.out.println(), or System.out.printf() so the analyzer can show output data after the run.");
+            return;
+        }
+
         if (inputPane.isRangeInput()) {
             analyzeCodeWithRange(code);
             return;
@@ -150,9 +155,17 @@ public class AnalysisController {
                     UIUtils.showError("Please enter manual input data.");
                     return;
                 }
+                if (!analyzer.readsStandardInput(code)) {
+                    UIUtils.showError("Manual Input selected, but your code does not appear to read from stdin.\n\nAdd Scanner, System.in, or BufferedReader input reads to your code, or choose Hardcoded Input if the data is already inside the program.");
+                    return;
+                }
                 finalInput = manualInput;
                 finalInputSize = 0;
             } else if (inputPane.isRandomInput()) {
+                if (!analyzer.supportsGeneratedInput(code)) {
+                    UIUtils.showError("Random Input selected, but no supported Scanner input pattern was found.\n\nAdd Scanner reads such as sc.nextInt(), sc.nextDouble(), or sc.nextLine(), or choose Manual Input for a custom format. If your data is inside the code, choose Hardcoded Input.");
+                    return;
+                }
                 int inputSize = Integer.parseInt(inputSizeText);
                 if (inputSize <= 0) {
                     UIUtils.showError("Input size must be greater than 0.");
@@ -176,10 +189,18 @@ public class AnalysisController {
                         arrayType = "random";
                 }
                 finalInput = analyzer.generateInput(code, inputSize, arrayType);
+                if (finalInput.isBlank()) {
+                    UIUtils.showError("Random Input could not generate input for this code.\n\nUse a simple Scanner format such as size first, then values, or switch to Manual Input and paste the exact input.");
+                    return;
+                }
                 finalInputSize = inputSize;
             } else {
                 if (!analyzer.hasHardcodedInput(code)) {
-                    UIUtils.showError("No hardcoded input found in the code. Please use hardcoded values or choose a different input type.");
+                    UIUtils.showError("Hardcoded Input selected, but no hardcoded data was found in your code.\n\nAdd data inside the program, such as int[] arr = {...}, List.of(...), Arrays.asList(...), or a String value. Otherwise choose Manual Input or Random Input.");
+                    return;
+                }
+                if (analyzer.hasScannerInput(code)) {
+                    UIUtils.showError("Hardcoded Input selected, but your code still reads from Scanner.\n\nRemove Scanner input reads if the data is hardcoded, or choose Manual Input/Random Input so the analyzer can provide stdin.");
                     return;
                 }
                 finalInput = "HARDCODED";
@@ -238,6 +259,11 @@ public class AnalysisController {
 
     private void analyzeCodeWithRange(String code) {
         try {
+            if (!analyzer.supportsGeneratedInput(code)) {
+                UIUtils.showError("Input Range needs generated input, but no supported Scanner input pattern was found.\n\nAdd Scanner reads such as sc.nextInt(), sc.nextDouble(), or sc.nextLine(). For custom formats, use Single Input with Manual Input instead.");
+                return;
+            }
+
             int minSize = Integer.parseInt(inputPane.getMinSizeText());
             int maxSize = Integer.parseInt(inputPane.getMaxSizeText());
             int stepSize = Integer.parseInt(inputPane.getStepSizeText());
