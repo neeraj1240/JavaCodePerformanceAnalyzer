@@ -70,15 +70,17 @@ public class InputGenerator {
                 if (arrayCount > 1) {
                     input.append(size).append("\n");
 
+                    int[] arr1 = generateArray(size, arrayType);
                     for (int i = 0; i < size; i++) {
-                        input.append(random.nextInt(100)).append(" ");
+                        input.append(arr1[i]).append(" ");
                     }
                     input.append("\n");
 
                     input.append(size).append("\n");
 
+                    int[] arr2 = generateArray(size, arrayType);
                     for (int i = 0; i < size; i++) {
-                        input.append(random.nextInt(100)).append(" ");
+                        input.append(arr2[i]).append(" ");
                     }
                     input.append("\n");
                 } else {
@@ -98,9 +100,14 @@ public class InputGenerator {
 
                     if (nextIntCount > 0 || nextDoubleCount > 0) {
                         input.append(size).append("\n");
+                        int[] arr = generateArray(size, arrayType);
                         for (int i = 0; i < size; i++) {
                             for (int j = 0; j < nextIntCount - 1; j++) {
-                                input.append(random.nextInt(100)).append(" ");
+                                if (j == 0) {
+                                    input.append(arr[i]).append(" ");
+                                } else {
+                                    input.append(random.nextInt(100)).append(" ");
+                                }
                             }
                             for (int j = 0; j < nextDoubleCount; j++) {
                                 input.append(random.nextDouble() * 100).append(" ");
@@ -114,6 +121,37 @@ public class InputGenerator {
 
         this.generatedInput = input.toString();
         return input.toString();
+    }
+
+    private int[] generateArray(int size, String arrayType) {
+        int[] array = new int[size];
+        switch (arrayType) {
+            case "sorted":
+                for (int i = 0; i < size; i++) {
+                    array[i] = i;
+                }
+                break;
+            case "nearly-sorted":
+                for (int i = 0; i < size; i++) {
+                    array[i] = i;
+                }
+                int swaps = Math.max(1, size / 10);
+                for (int i = 0; i < swaps; i++) {
+                    int pos1 = random.nextInt(size);
+                    int pos2 = Math.min(size - 1, pos1 + random.nextInt(3) + 1);
+                    int temp = array[pos1];
+                    array[pos1] = array[pos2];
+                    array[pos2] = temp;
+                }
+                break;
+            case "random":
+            default:
+                for (int i = 0; i < size; i++) {
+                    array[i] = random.nextInt(100);
+                }
+                break;
+        }
+        return array;
     }
 
     private String detectDataType(String code) {
